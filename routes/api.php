@@ -14,6 +14,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+/*//rooms
+Route::get('/rooms', [RoomController::class, 'index']);
+Route::get('/rooms/{room}', [RoomController::class, 'show']);
+Route::post('/rooms', [RoomController::class, 'store']);
+Route::put('/rooms/{room}', [RoomController::class, 'update']);
+Route::delete('/rooms/{room}', [RoomController::class, 'destroy']);
+Route::get('/rooms/search/{date}', [RoomController::class, 'search']);*/
+
+
+
+Route::group(['middleware' => ['auth:sanctum']], function () {
 });
