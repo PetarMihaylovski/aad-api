@@ -3,6 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ShopController;
+use App\Http\Controllers\UserController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,6 +26,9 @@ Route::delete('/rooms/{room}', [RoomController::class, 'destroy']);
 Route::get('/rooms/search/{date}', [RoomController::class, 'search']);*/
 
 
+Route::post('/shop', [ShopController::class, 'store']);
+Route::post('/user', [UserController::class, 'store']);
+Route::get('/user', [UserController::class, 'index']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 });

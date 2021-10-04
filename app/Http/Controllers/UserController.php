@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
-class Shop extends Controller
+
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -13,7 +15,7 @@ class Shop extends Controller
      */
     public function index()
     {
-        //
+        return $users = User::with('getShopRelation')->get();
     }
 
     /**
@@ -24,7 +26,13 @@ class Shop extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'username' => 'required',
+            'email' => 'required|unique:users',
+            'password' => 'required'
+        ]);
+
+        return User::create($request->all());
     }
 
     /**

@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Shop;
 
-class User extends Controller
+class ShopController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -24,7 +25,12 @@ class User extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'userId' => 'required',
+            'description' => 'required'
+        ]);
+
+        return Shop::create($request->all());
     }
 
     /**
