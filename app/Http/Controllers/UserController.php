@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 
 class UserController extends Controller
@@ -15,6 +16,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        //test
         return $users = User::with('getShopRelation')->get();
     }
 
@@ -26,46 +28,59 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'username' => 'required',
-            'email' => 'required|unique:users',
-            'password' => 'required'
+        $fields = $request->validate([
+            'username' => 'required|string',
+            'email' => 'required|unique:users,email',
+            'password' => 'required|string'
         ]);
 
-        return User::create($request->all());
+        $user = User::create([
+            'username' => $fields['username'],
+            'email' => $fields['email'],
+            'password' => bcrypt($fields['password'])
+        ]);
+
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($response, 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
+    public function login(Request $request){
+        $fields = $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string'
+        ]);
+
+        //check email
+        $user = User::where('email', $fields['email'])->first();
+
+        //check password
+        if(!$user || !Hash::check($fields['password'], $user->password)){
+            return response([
+                'message' => 'Bad credentials'
+            ], 401);
+        }
+
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $response = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($response, 201);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
+    public function logout(Request $request){
+        auth()->user()->tokens()->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        return response([
+            'message' => 'Logged out'
+        ], 200);
     }
 }

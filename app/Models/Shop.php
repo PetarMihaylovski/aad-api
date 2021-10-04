@@ -11,7 +11,11 @@ class Shop extends Model
 
     protected $fillable =
         [
-            'userId',
+            'user-id',
             'description'
         ];
+
+    public function getProductsRelation(){
+        return $this->hasMany('App\Models\Product', 'shop-id', 'id');
+    }
 }

@@ -43,6 +43,6 @@ class User extends Authenticatable
     ];
 
     public function getShopRelation(){
-        return $this->hasOne('App\Models\Shop', 'userId', 'id');
+        return $this->hasOne('App\Models\Shop', 'user-id', 'id');
     }
 }
