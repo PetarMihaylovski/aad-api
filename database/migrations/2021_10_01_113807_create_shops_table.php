@@ -17,6 +17,7 @@ class CreateShopsTable extends Migration
             $table->id();
             $table->integer('user-id');
             $table->string('description');
+            $table->string('image-url');
             $table->timestamps();
         });
     }

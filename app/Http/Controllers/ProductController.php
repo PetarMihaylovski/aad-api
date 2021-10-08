@@ -30,8 +30,8 @@ class ProductController extends Controller
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
-            'image-url' => 'required',
-            'shop-id' => 'required'
+            'shop-id' => 'required',
+            'category' => 'required',
         ]);
 
         return Product::create($request->all());

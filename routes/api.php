@@ -30,7 +30,7 @@ Route::get('/rooms/search/{date}', [RoomController::class, 'search']);*/
 //shop routes
 Route::post('/shop', [ShopController::class, 'store']);
 Route::get('/shop/{id}', [ShopController::class, 'show']);
-Route::get('/shop/product/{id}', [ShopController::class, 'getAllProdutsFromShop']);
+Route::get('/shop/{id}/product', [ShopController::class, 'getAllProdutsFromShop']);
 
 //user routes
 Route::post('/user', [UserController::class, 'store']);

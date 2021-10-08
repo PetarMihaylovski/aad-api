@@ -5,18 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Shop extends Model
+class Images extends Model
 {
     use HasFactory;
-
     protected $fillable =
         [
-            'user-id',
-            'description',
+            'product-id',
             'image-url'
         ];
-
-    public function getProductsRelation(){
-        return $this->hasMany('App\Models\Product', 'shop-id', 'id');
-    }
 }

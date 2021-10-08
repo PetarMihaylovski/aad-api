@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Shop;
+use Symfony\Component\Console\Input\Input;
 
 class ShopController extends Controller
 {
@@ -32,12 +33,48 @@ class ShopController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'user-id' => 'required',
-            'description' => 'required'
+        $request->merge([
+            'image-url' => 'test'
         ]);
 
-        return Shop::create($request->all());
+        $fields = $request->validate([
+            'user-id' => 'required',
+            'description' => 'required',
+            'image-url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        if($request->hasFile('image-url')){
+            $path = $request->file('image-url');
+
+
+            $filenameWithExt = $request->file('image-url')->getClientOriginalName();
+
+            //Get filename
+            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+            //$filename = basename($path, '.php');
+
+            //Get just extension
+            $extension = $request->file('image-url')->getClientOriginalExtension();
+
+            //Filename to store
+            $filenameToStore = $filename.'_'.time().'.'.$extension;
+
+            //Upload Imagepath
+            $request->file('image-url')->storeAs('public/image', $filenameToStore);
+
+
+        }else{
+            $filenameToStore = 'noimage.jpg';
+        }
+
+        return Shop::create([
+            'user-id' => $request->input('user-id'),
+            'description' => $request->input('description'),
+            'image-url' => 'public/image/'.$filenameToStore,
+
+
+
+        ]);
     }
 
     /**
