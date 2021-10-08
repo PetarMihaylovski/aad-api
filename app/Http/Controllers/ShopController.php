@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use App\Models\Shop;
 use Symfony\Component\Console\Input\Input;
@@ -22,7 +23,7 @@ class ShopController extends Controller
     public function getAllProdutsFromShop($id){
         $shop = Shop::find($id);
         //return $shops = Shop::with('getProductsRelation')->get();
-        return $shops = $shop::with('getProductsRelation')->get();
+        return response($shops = $shop::with('getProductsRelation')->get(), 200);
     }
 
     /**
@@ -67,14 +68,12 @@ class ShopController extends Controller
             $filenameToStore = 'noimage.jpg';
         }
 
-        return Shop::create([
+        return Response(Shop::create([
             'user-id' => $request->input('user-id'),
             'description' => $request->input('description'),
             'image-url' => 'public/image/'.$filenameToStore,
 
-
-
-        ]);
+        ]), 201);
     }
 
     /**
@@ -85,7 +84,7 @@ class ShopController extends Controller
      */
     public function show($id)
     {
-        return Shop::find($id);
+        return Response(Shop::find($id), 200);
     }
 
     /**

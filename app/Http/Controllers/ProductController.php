@@ -34,7 +34,7 @@ class ProductController extends Controller
             'category' => 'required',
         ]);
 
-        return Product::create($request->all());
+        return Response(Product::create($request->all(), 201));
     }
 
     /**

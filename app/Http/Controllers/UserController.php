@@ -63,7 +63,7 @@ class UserController extends Controller
         if(!$user || !Hash::check($fields['password'], $user->password)){
             return response([
                 'message' => 'Bad credentials'
-            ], 401);
+            ], 400);
         }
 
         $token = $user->createToken('myapptoken')->plainTextToken;
@@ -73,7 +73,7 @@ class UserController extends Controller
             'token' => $token
         ];
 
-        return response($response, 201);
+        return response($response, 200);
     }
 
     public function logout(Request $request){
