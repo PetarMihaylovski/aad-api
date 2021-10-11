@@ -30,7 +30,7 @@ class ProductController extends Controller
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
-            'shop-id' => 'required',
+            'shop_id' => 'required',
             'category' => 'required',
         ]);
 
