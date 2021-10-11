@@ -14,12 +14,14 @@ class CreateShopsTable extends Migration
     public function up()
     {
         Schema::create('shops', function (Blueprint $table) {
-            $table->id();
+            $table->increments('id');
             $table->string('name');
-            $table->integer('user_id');
+            $table->unsignedBigInteger('user_id'); // id and foreign key data types should be the same
             $table->string('description');
-            $table->string('image_url');
+            $table->string('image_url')->nullable();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 
