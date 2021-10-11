@@ -39,29 +39,30 @@ class ShopController extends Controller
         ]);
 
         $fields = $request->validate([
-            'user-id' => 'required',
+            'name' => 'required',
+            'user_id' => 'required',
             'description' => 'required',
-            'image-url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if($request->hasFile('image-url')){
-            $path = $request->file('image-url');
+        if($request->hasFile('image_url')){
+            $path = $request->file('image_url');
 
 
-            $filenameWithExt = $request->file('image-url')->getClientOriginalName();
+            $filenameWithExt = $request->file('image_url')->getClientOriginalName();
 
             //Get filename
             $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
             //$filename = basename($path, '.php');
 
             //Get just extension
-            $extension = $request->file('image-url')->getClientOriginalExtension();
+            $extension = $request->file('image_url')->getClientOriginalExtension();
 
             //Filename to store
             $filenameToStore = $filename.'_'.time().'.'.$extension;
 
             //Upload Imagepath
-            $request->file('image-url')->storeAs('public/image', $filenameToStore);
+            $request->file('image_url')->storeAs('public/image', $filenameToStore);
 
 
         }else{
@@ -69,9 +70,10 @@ class ShopController extends Controller
         }
 
         return Response(Shop::create([
-            'user-id' => $request->input('user-id'),
+            'name' => $request->input('name'),
+            'user_id' => $request->input('user_id'),
             'description' => $request->input('description'),
-            'image-url' => 'public/image/'.$filenameToStore,
+            'image_url' => 'public/image/'.$filenameToStore,
 
         ]), 201);
     }

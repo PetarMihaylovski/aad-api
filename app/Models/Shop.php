@@ -11,9 +11,10 @@ class Shop extends Model
 
     protected $fillable =
         [
-            'user-id',
+            'name',
+            'user_id',
             'description',
-            'image-url'
+            'image_url'
         ];
 
     public function getProductsRelation(){
