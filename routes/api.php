@@ -29,21 +29,21 @@ Route::get('/rooms/search/{date}', [RoomController::class, 'search']);*/
 
 //shop routes
 Route::middleware(['cors'])->group(function () {
-    Route::get('/shop', [ShopController::class, 'index']);
+    Route::get('/shops', [ShopController::class, 'index']);
 });
 
-Route::post('/shop', [ShopController::class, 'store']);
-Route::get('/shop/{id}', [ShopController::class, 'show']);
-Route::get('/shop/{id}/product', [ShopController::class, 'getAllProdutsFromShop']);
+Route::post('/shops', [ShopController::class, 'store']);
+Route::get('/shops/{id}', [ShopController::class, 'show']);
+Route::get('/shops/{id}/products', [ShopController::class, 'getAllProdutsFromShop']);
 
 //user routes
-Route::post('/user', [UserController::class, 'store']);
+Route::post('/users', [UserController::class, 'store']);
 //testing
-Route::get('/user', [UserController::class, 'index']);
+Route::get('/users', [UserController::class, 'index']);
 
 //product routes
-Route::get('/product', [ProductController::class, 'index']);
-Route::post('/product', [ProductController::class, 'store']);
+Route::get('/products', [ProductController::class, 'index']);
+Route::post('/products', [ProductController::class, 'store']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 });
