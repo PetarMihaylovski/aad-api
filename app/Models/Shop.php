@@ -18,6 +18,6 @@ class Shop extends Model
         ];
 
     public function getProductsRelation(){
-        return $this->hasMany('App\Models\Product', 'shop-id', 'id');
+        return $this->hasMany('App\Models\Product', 'shop_id', 'id');
     }
 }
