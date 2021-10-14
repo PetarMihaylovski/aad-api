@@ -45,7 +45,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        return response(Product::where('shop_id', $id)->get(), 200);
     }
 
     /**

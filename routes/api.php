@@ -34,7 +34,7 @@ Route::middleware(['cors'])->group(function () {
 
 Route::post('/shops', [ShopController::class, 'store']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
-Route::get('/shops/{id}/products', [ShopController::class, 'getAllProdutsFromShop']);
+Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
 //user routes
 Route::post('/users', [UserController::class, 'store']);
