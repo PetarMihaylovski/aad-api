@@ -20,27 +20,37 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * @param \Illuminate\Http\Request $request
      */
     public function store(Request $request)
     {
-        //ToDo stock url
         $request->validate([
-            'name' => 'required',
-            'price' => 'required',
-            'stock' => 'required',
-            'shop_id' => 'required',
-            'category' => 'required',
+            '*.name' => 'required',
+            '*.price' => 'required',
+            '*.stock' => 'required',
+            '*.shop_id' => 'required',
+            '*.category' => 'required',
         ]);
 
-        return Response(Product::create($request->all(), 201));
+        $rsp = [];
+        foreach ($request->all() as $data) {
+            $container = new Product([
+                'name' => $data['name'],
+                'price' => (double)$data['price'],
+                'stock' => (int)$data['stock'],
+                'shop_id' => $data['shop_id'],
+                'category' => $data['category']
+            ]);
+            $container->save();
+            array_push($rsp, $container);
+        }
+        return response($rsp, 201);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -51,8 +61,8 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -63,7 +73,7 @@ class ProductController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
