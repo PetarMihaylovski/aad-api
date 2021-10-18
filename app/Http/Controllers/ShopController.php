@@ -34,11 +34,7 @@ class ShopController extends Controller
      */
     public function store(Request $request)
     {
-        $request->merge([
-            'image-url' => 'test'
-        ]);
-
-        $fields = $request->validate([
+        $request->validate([
             'name' => 'required',
             'user_id' => 'required',
             'description' => 'required',
@@ -47,7 +43,6 @@ class ShopController extends Controller
 
         if($request->hasFile('image_url')){
             $path = $request->file('image_url');
-
 
             $filenameWithExt = $request->file('image_url')->getClientOriginalName();
 

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ImageUploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,6 +42,8 @@ Route::get('/user', [UserController::class, 'index']);
 //product routes
 Route::get('/product', [ProductController::class, 'index']);
 Route::post('/product', [ProductController::class, 'store']);
+
+Route::post('/product/image', [ImageUploadController::class, 'uploadProductImages']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
 });

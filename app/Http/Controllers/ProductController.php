@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Shop;
+use App\Models\User;
+use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -25,7 +28,6 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //ToDo stock url
         $request->validate([
             'name' => 'required',
             'price' => 'required',
@@ -45,7 +47,7 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        return response(Product::find($id), 200);
     }
 
     /**
@@ -57,7 +59,17 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $authUserId = Auth::id();
+        $product = Product::find($id);
+        $shop = Shop::find($product['shop_id']);
+
+        if($shop['user_id'] !== $authUserId){
+            return response('Unauthenticated', 403);
+        }
+
+        $product->update($request->all());
+
+        return response($product, 200);
     }
 
     /**
@@ -68,6 +80,16 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $authUserId = Auth::id();
+        $product = Product::find($id);
+        $shop = Shop::find($product['shop_id']);
+
+        if($shop['user_id'] !== $authUserId){
+            return response('Unauthenticated', 403);
+        }
+
+        Product::destroy($id);
+        return response('Product successfully deleted', 200);
+
     }
 }
