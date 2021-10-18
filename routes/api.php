@@ -19,34 +19,31 @@ use App\Http\Controllers\ImageUploadController;
 |
 */
 
-//Examples
-/*
-Route::get('/rooms', [RoomController::class, 'index']);
-Route::get('/rooms/{room}', [RoomController::class, 'show']);
-Route::post('/rooms', [RoomController::class, 'store']);
-Route::put('/rooms/{room}', [RoomController::class, 'update']);
-Route::delete('/rooms/{room}', [RoomController::class, 'destroy']);
-Route::get('/rooms/search/{date}', [RoomController::class, 'search']);*/
-
 //shop routes
 Route::middleware(['cors'])->group(function () {
     Route::get('/shops', [ShopController::class, 'index']);
 });
 
-Route::post('/shops', [ShopController::class, 'store']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
 Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
 //user routes
-Route::post('/users', [UserController::class, 'store']);
-//testing
-Route::get('/users', [UserController::class, 'index']);
+Route::post('/register', [UserController::class, 'store']);
+Route::get('/login', [UserController::class, 'login']);
+
 
 //product routes
 Route::get('/products', [ProductController::class, 'index']);
-Route::post('/products', [ProductController::class, 'store']);
+
 
 Route::post('/product/image', [ImageUploadController::class, 'uploadProductImages']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('/logout', [UserController::class, 'logout']);
+    Route::post('/shops', [ShopController::class, 'store']);
+
+
+    //ToDo change 1 of the 2 routes
+    Route::post('/products', [ProductController::class, 'store']);
+    Route::post('/products/one', [ProductController::class, 'storeOneProduct']);
 });

@@ -36,7 +36,6 @@ class ShopController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'user_id' => 'required',
             'description' => 'required',
             'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
@@ -64,9 +63,11 @@ class ShopController extends Controller
             $filenameToStore = 'noimage.jpg';
         }
 
+        $user = auth()->user();
+
         return Response(Shop::create([
             'name' => $request->input('name'),
-            'user_id' => $request->input('user_id'),
+            'user_id' => $user['id'],
             'description' => $request->input('description'),
             'image_url' => 'public/image/'.$filenameToStore,
 
