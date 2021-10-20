@@ -10,16 +10,30 @@ use Illuminate\Http\Request;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Return all products with images
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        return response(Product::all(), 200);
+        $products = Product::all();
+
+        $productsWithImages = [];
+        foreach ($products as $product){
+            $images = Image::where('product_id', $product['id'])->get();
+            array_push($productsWithImages, $product, $images);
+        }
+
+        return response($productsWithImages, 200);
     }
 
-    public function storeOneProduct(Request $request){
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function store(Request $request){
         $request->validate([
             'name' => 'required',
             'price' => 'required',
@@ -68,61 +82,6 @@ class ProductController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            '*.name' => 'required',
-            '*.price' => 'required',
-            '*.stock' => 'required',
-            '*.shop_id' => 'required',
-            '*.category' => 'required',
-            '*.images' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-
-        $rsp = [];
-        foreach ($request->all() as $data) {
-            $container = new Product([
-                'name' => $data['name'],
-                'price' => (double)$data['price'],
-                'stock' => (int)$data['stock'],
-                'shop_id' => $data['shop_id'],
-                'category' => $data['category']
-            ]);
-            if($request->hasFile('images')){
-                $images = $request->file('images');
-
-                foreach ($images as $image){
-                    $filenameWithExt = $image->getClientOriginalName();
-                    //Get filename
-                    $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-                    //Get just extension
-                    $extension = $image->getClientOriginalExtension();
-
-                    //Filename to store
-                    $filenameToStore = $filename.'_'.time().'.'.$extension;
-
-                    //Upload Imagepath
-                    $image->storeAs('public/image', $filenameToStore);
-
-                    Image::create([
-                        'product_id' => '1',
-                        'path' => 'public/image/'.$filenameToStore
-                    ]);
-                }
-            }
-
-            $container->save();
-            array_push($rsp, $container);
-        }
-        return response($rsp, 201);
-    }
-
-    /**
      * Display the specified resource.
      *
      * @param int $id
@@ -130,7 +89,18 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        return response(Product::where('shop_id', $id)->get(), 200);
+        $product = Product::find($id);
+
+        if(!$product){
+            return Response('Product does not exist', 404);
+        }
+
+        $productsWithImages = [];
+        $images = Image::where('product_id', $product['id'])->get();
+
+        array_push($productsWithImages, $product, $images);
+
+        return response($productsWithImages, 200);
     }
 
     /**
@@ -142,7 +112,22 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        if(!$this->isOwner($id)){
+            return response('Unauthenticated', 403);
+        }
+
+        $request->validate([
+            'name' => 'required',
+            'price' => 'required',
+            'stock' => 'required',
+            'category' => 'required',
+        ]);
+
+        $product = Product::find($id);
+
+        $product->update($request->all());
+
+        return response($product, 200);
     }
 
     /**
@@ -153,6 +138,40 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        if(!$this->isOwner($id)){
+            return response('Unauthenticated', 403);
+        }
+
+        return response(Product::destroy($id), 200);
+    }
+
+    /**
+     * Get resources with specific category
+     *
+     * @param int $query
+     * @return \Illuminate\Http\Response
+     */
+    public function filter($query){
+        $products = Product::where('category', $query)->get();
+
+        return response($products, 200);
+    }
+
+    /**
+     * Check if user is allowed for actions
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function isOwner($id){
+        $user = auth()->user();
+        $shop = Shop::where('user_id', $user['id'])->get()->first();
+        $product = Product::find($id);
+
+        if($product['shop_id'] !== $shop['id']){
+            return false;
+        }
+
+        return true;
     }
 }

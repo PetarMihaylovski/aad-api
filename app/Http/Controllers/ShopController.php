@@ -22,7 +22,6 @@ class ShopController extends Controller
 
     public function getAllProdutsFromShop($id){
         $shop = Shop::find($id);
-        //return $shops = Shop::with('getProductsRelation')->get();
         return response($shops = $shop::with('getProductsRelation')->get(), 200);
     }
 
@@ -34,6 +33,13 @@ class ShopController extends Controller
      */
     public function store(Request $request)
     {
+        $user = auth()->user();
+        $shop = Shop::where('user_id', $user['id'])->get()->first();
+
+        if($shop){
+            return response('Only 1 shop allowed per user', 200);
+        }
+
         $request->validate([
             'name' => 'required',
             'description' => 'required',
@@ -94,6 +100,16 @@ class ShopController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if(!$this->isOwner($id)){
+            return response('Unauthenticated', 403);
+        }
+
+        $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
         $shop = Shop::find($id);
 
         $shop->update($request->all());
@@ -109,7 +125,28 @@ class ShopController extends Controller
      */
     public function destroy($id)
     {
+        if(!$this->isOwner($id)){
+            return response('Unauthenticated', 403);
+        }
+
         Shop::destroy($id);
         return response('Shop successfully deleted', 200);
+    }
+
+    /**
+     * Check if user is allowed for actions
+     *
+     * @param int $id
+     * @return bool
+     */
+    public function isOwner($id){
+        $user = auth()->user();
+        $shop = Shop::where('id', $id)->get()->first();
+
+        if($user['id'] !== $shop['user_id']){
+            return false;
+        }
+
+        return true;
     }
 }

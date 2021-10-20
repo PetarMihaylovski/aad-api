@@ -24,6 +24,8 @@ Route::middleware(['cors'])->group(function () {
     Route::get('/shops', [ShopController::class, 'index']);
 });
 
+//product routes
+Route::get('/products', [ProductController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
 Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
@@ -32,18 +34,19 @@ Route::post('/register', [UserController::class, 'store']);
 Route::get('/login', [UserController::class, 'login']);
 
 
-//product routes
-Route::get('/products', [ProductController::class, 'index']);
 
-
-Route::post('/product/image', [ImageUploadController::class, 'uploadProductImages']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    //user routes
     Route::get('/logout', [UserController::class, 'logout']);
+
+    //shop routes
     Route::post('/shops', [ShopController::class, 'store']);
+    Route::post('/shops/{id}', [ShopController::class, 'update']);
 
-
-    //ToDo change 1 of the 2 routes
+    //product routes
+    Route::post('/products/{id}', [ProductController::class, 'update']);
     Route::post('/products', [ProductController::class, 'store']);
-    Route::post('/products/one', [ProductController::class, 'storeOneProduct']);
+    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::get('/products/{query}', [ProductController::class, 'filter']);
 });
