@@ -89,18 +89,17 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        $product = Product::find($id);
+        $products = Product::where('shop_id', $id)->get();
 
-        if(!$product){
+        if(!$products){
             return Response('Product does not exist', 404);
         }
 
-        $productsWithImages = [];
-        $images = Image::where('product_id', $product['id'])->get();
-
-        array_push($productsWithImages, $product, $images);
-
-        return response($productsWithImages, 200);
+        foreach ($products as $p) {
+            $images = Image::where('product_id', $p['id'])->get();
+            $p->images = $images;
+        }
+        return response($products, 200);
     }
 
     /**
