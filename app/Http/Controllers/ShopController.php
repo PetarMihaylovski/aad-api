@@ -75,8 +75,7 @@ class ShopController extends Controller
             'name' => $request->input('name'),
             'user_id' => $user['id'],
             'description' => $request->input('description'),
-            'image_url' => 'public/image/'.$filenameToStore,
-
+            'image_url' => '/storage/image/' . $filenameToStore,
         ]), 201);
     }
 

@@ -31,7 +31,7 @@ Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
 //user routes
 Route::post('/register', [UserController::class, 'store']);
-Route::get('/login', [UserController::class, 'login']);
+Route::post('/login', [UserController::class, 'login']);
 
 
 
