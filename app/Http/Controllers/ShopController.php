@@ -62,7 +62,7 @@ class ShopController extends Controller
             $filenameToStore = $filename.'_'.time().'.'.$extension;
 
             //Upload Imagepath
-            $request->file('image_url')->storeAs('public/image', $filenameToStore);
+            $request->file('image_url')->storeAs('public/image/shops', $filenameToStore);
 
 
         }else{
@@ -75,7 +75,7 @@ class ShopController extends Controller
             'name' => $request->input('name'),
             'user_id' => $user['id'],
             'description' => $request->input('description'),
-            'image_url' => '/storage/image/' . $filenameToStore,
+            'image_url' => '/storage/image/shops/' . $filenameToStore,
         ]), 201);
     }
 

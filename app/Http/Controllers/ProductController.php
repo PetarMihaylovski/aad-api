@@ -27,57 +27,7 @@ class ProductController extends Controller
         return response($productsWithImages, 200);
     }
 
-    public function storeArray(Request $request)
-    {
-        $request->validate([
-            '*.name' => 'required',
-            '*.price' => 'required',
-            '*.stock' => 'required',
-            '*.category' => 'required',
-            '*.images[]' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
-        $user = auth()->user();
-        $shop = Shop::where('user_id', $user['id'])->get()->first();
 
-        $rsp = [];
-        foreach ($request->all() as $fields) {
-            $product = new Product([
-                'name' => $fields['name'],
-                'price' => (double)$fields['price'],
-                'stock' => (int)$fields['stock'],
-                'shop_id' => $shop['id'],
-                'category' => $fields['category']
-            ]);
-            $product->save();
-            $imgs = [];
-
-            if ($request->hasFile('images')) {
-                $images = $request->file('images');
-                foreach ($images as $image) {
-                    $filenameWithExt = $image->getClientOriginalName();
-                    //Get filename
-                    $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-                    //Get just extension
-                    $extension = $image->getClientOriginalExtension();
-
-                    //Filename to store
-                    $filenameToStore = $filename . '_' . time() . '.' . $extension;
-
-                    //Upload Imagepath
-                    $image->storeAs('public/image/product', $filenameToStore);
-
-                    array_push($imgs, Image::create([
-                        'product_id' => $product['id'],
-                        'path' => 'public/image/product' . $filenameToStore
-                    ]));
-                }
-            }
-            $product->images=$imgs;
-            array_push($rsp, $product);
-        }
-        return response($rsp, 201);
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -92,7 +42,9 @@ class ProductController extends Controller
             'price' => 'required',
             'stock' => 'required',
             'category' => 'required',
-            'images[]' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'imageOne' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imageTwo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'imageThree' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
 
@@ -108,9 +60,17 @@ class ProductController extends Controller
             'category' => $request->input('category'),
         ]);
 
-        if ($request->hasFile('images')) {
-            $images = $request->file('images');
+        if ($request->hasFile('imageOne')) {
+            $images = [];
+            array_push($images, $request->file('imageOne'));
+            array_push($images, $request->file('imageTwo'));
+            array_push($images, $request->file('imageThree'));
 
+            $imgs = [];
+
+            // all three images are saved withing the same timestamp
+            // so this counter gives them a unique part
+            $counter = 0;
             foreach ($images as $image) {
                 $filenameWithExt = $image->getClientOriginalName();
                 //Get filename
@@ -120,16 +80,18 @@ class ProductController extends Controller
                 $extension = $image->getClientOriginalExtension();
 
                 //Filename to store
-                $filenameToStore = $filename . '_' . time() . '.' . $extension;
+                $filenameToStore = $filename .'_'. $counter  . '_' . time() . '.' . $extension;
 
                 //Upload Imagepath
-                $image->storeAs('public/image', $filenameToStore);
+                $image->storeAs('public/image/products/', $filenameToStore);
 
-                Image::create([
+                 array_push($imgs, Image::create([
                     'product_id' => $product['id'],
-                    'path' => 'public/image/' . $filenameToStore
-                ]);
+                    'path' => '/storage/image/products/' . $filenameToStore
+                ]));
+                 $counter += 1;
             }
+            $product->images = $imgs;
         }
         return response($product, 201);
     }
