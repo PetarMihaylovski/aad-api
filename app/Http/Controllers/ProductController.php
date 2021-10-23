@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Image;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -26,8 +27,6 @@ class ProductController extends Controller
 
         return response($productsWithImages, 200);
     }
-
-
 
     /**
      * Store a newly created resource in storage.
@@ -70,7 +69,6 @@ class ProductController extends Controller
 
             // all three images are saved withing the same timestamp
             // so this counter gives them a unique part
-            $counter = 0;
             foreach ($images as $image) {
                 $filenameWithExt = $image->getClientOriginalName();
                 //Get filename
@@ -80,7 +78,7 @@ class ProductController extends Controller
                 $extension = $image->getClientOriginalExtension();
 
                 //Filename to store
-                $filenameToStore = $filename .'_'. $counter  . '_' . time() . '.' . $extension;
+                $filenameToStore = Str::uuid() . '_' . time() . '.' . $extension;
 
                 //Upload Imagepath
                 $image->storeAs('public/image/products/', $filenameToStore);
@@ -89,7 +87,6 @@ class ProductController extends Controller
                     'product_id' => $product['id'],
                     'path' => '/storage/image/products/' . $filenameToStore
                 ]));
-                 $counter += 1;
             }
             $product->images = $imgs;
         }
