@@ -19,12 +19,64 @@ class ProductController extends Controller
         $products = Product::all();
 
         $productsWithImages = [];
-        foreach ($products as $product){
+        foreach ($products as $product) {
             $images = Image::where('product_id', $product['id'])->get();
             array_push($productsWithImages, $product, $images);
         }
 
         return response($productsWithImages, 200);
+    }
+
+    public function storeArray(Request $request)
+    {
+        $request->validate([
+            '*.name' => 'required',
+            '*.price' => 'required',
+            '*.stock' => 'required',
+            '*.category' => 'required',
+            '*.images[]' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+        $user = auth()->user();
+        $shop = Shop::where('user_id', $user['id'])->get()->first();
+
+        $rsp = [];
+        foreach ($request->all() as $fields) {
+            $product = new Product([
+                'name' => $fields['name'],
+                'price' => (double)$fields['price'],
+                'stock' => (int)$fields['stock'],
+                'shop_id' => $shop['id'],
+                'category' => $fields['category']
+            ]);
+            $product->save();
+            $imgs = [];
+
+            if ($request->hasFile('images')) {
+                $images = $request->file('images');
+                foreach ($images as $image) {
+                    $filenameWithExt = $image->getClientOriginalName();
+                    //Get filename
+                    $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
+
+                    //Get just extension
+                    $extension = $image->getClientOriginalExtension();
+
+                    //Filename to store
+                    $filenameToStore = $filename . '_' . time() . '.' . $extension;
+
+                    //Upload Imagepath
+                    $image->storeAs('public/image/product', $filenameToStore);
+
+                    array_push($imgs, Image::create([
+                        'product_id' => $product['id'],
+                        'path' => 'public/image/product' . $filenameToStore
+                    ]));
+                }
+            }
+            $product->images=$imgs;
+            array_push($rsp, $product);
+        }
+        return response($rsp, 201);
     }
 
     /**
@@ -33,7 +85,8 @@ class ProductController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         $request->validate([
             'name' => 'required',
             'price' => 'required',
@@ -47,7 +100,7 @@ class ProductController extends Controller
         $shop = Shop::where('user_id', $user['id'])->get()->first();
 
 
-       $product =  Product::create([
+        $product = Product::create([
             'name' => $request->input('name'),
             'price' => $request->input('price'),
             'stock' => $request->input('stock'),
@@ -55,10 +108,10 @@ class ProductController extends Controller
             'category' => $request->input('category'),
         ]);
 
-        if($request->hasFile('images')){
+        if ($request->hasFile('images')) {
             $images = $request->file('images');
 
-            foreach ($images as $image){
+            foreach ($images as $image) {
                 $filenameWithExt = $image->getClientOriginalName();
                 //Get filename
                 $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
@@ -67,14 +120,14 @@ class ProductController extends Controller
                 $extension = $image->getClientOriginalExtension();
 
                 //Filename to store
-                $filenameToStore = $filename.'_'.time().'.'.$extension;
+                $filenameToStore = $filename . '_' . time() . '.' . $extension;
 
                 //Upload Imagepath
                 $image->storeAs('public/image', $filenameToStore);
 
                 Image::create([
                     'product_id' => $product['id'],
-                    'path' => 'public/image/'.$filenameToStore
+                    'path' => 'public/image/' . $filenameToStore
                 ]);
             }
         }
@@ -91,7 +144,7 @@ class ProductController extends Controller
     {
         $products = Product::where('shop_id', $id)->get();
 
-        if(!$products){
+        if (!$products) {
             return Response('Product does not exist', 404);
         }
 
@@ -111,7 +164,7 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!$this->isOwner($id)){
+        if (!$this->isOwner($id)) {
             return response('Unauthenticated', 403);
         }
 
@@ -137,7 +190,7 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        if(!$this->isOwner($id)){
+        if (!$this->isOwner($id)) {
             return response('Unauthenticated', 403);
         }
 
@@ -150,7 +203,8 @@ class ProductController extends Controller
      * @param int $query
      * @return \Illuminate\Http\Response
      */
-    public function filter($query){
+    public function filter($query)
+    {
         $products = Product::where('category', $query)->get();
 
         return response($products, 200);
@@ -162,12 +216,13 @@ class ProductController extends Controller
      * @param int $id
      * @return bool
      */
-    public function isOwner($id){
+    public function isOwner($id)
+    {
         $user = auth()->user();
         $shop = Shop::where('user_id', $user['id'])->get()->first();
         $product = Product::find($id);
 
-        if($product['shop_id'] !== $shop['id']){
+        if ($product['shop_id'] !== $shop['id']) {
             return false;
         }
 
