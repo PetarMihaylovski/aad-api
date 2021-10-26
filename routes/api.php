@@ -7,6 +7,7 @@ use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ use App\Http\Controllers\ImageUploadController;
 Route::middleware(['cors'])->group(function () {
     Route::get('/shops', [ShopController::class, 'index']);
 });
+
+
+
 
 //product routes
 Route::get('/products', [ProductController::class, 'index']);
@@ -49,4 +53,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/product', [ProductController::class, 'store']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/products/{query}', [ProductController::class, 'filter']);
+
+    //order routes
+    Route::post('/orders', [OrderController::class, 'store']);
 });

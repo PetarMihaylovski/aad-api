@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6cadd819a6415b190ae2704ced6e6c8b",
+    "content-hash": "edaed0f7874922121c660a5be79be14c",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1195,7 +1195,6 @@
                 "issues": "https://github.com/laravel/sanctum/issues",
                 "source": "https://github.com/laravel/sanctum"
             },
-
             "time": "2021-10-13T13:38:15+00:00"
         },
         {
