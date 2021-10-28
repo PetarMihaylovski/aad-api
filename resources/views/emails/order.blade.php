@@ -25,21 +25,43 @@
     <title>Test Mail</title>
 </head>
 <body>
+<div class="container">
     <h1>{{$details['title']}}</h1>
-
-    <table>
-        <tr>
-            <th>Product</th>
-            <th>price</th>
-            <th>amount</th>
-        </tr>
-        <tr>
-            <td>{{$details['product']['name']}}</td>
-            <td>€{{$details['product']['price']}}</td>
-            <td>{{$details['product']['stock']}}</td>
-            <td>Total :€{{$details['total']}}</td>
-        </tr>
-    </table>
-
+    <div class="col-8">
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Amount</th>
+            </tr>
+            <tr>
+                <td>{{$details['product']['name']}}</td>
+                <td>€{{$details['product']['price']}}</td>
+                <td>{{$details['stock']}}</td>
+                <td>Total : €{{$details['total']}}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <h2>User Information</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            Email : {{$details['user']['email']}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            Address : {{$details['user']['address']}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            Postal : {{$details['user']['postal']}}
+        </div>
+    </div>
+</div>
 </body>
 </html>
