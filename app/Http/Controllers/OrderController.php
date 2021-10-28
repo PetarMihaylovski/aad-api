@@ -47,7 +47,7 @@ class OrderController extends Controller
 
             $product = Product::find($order['product_id']);
 
-            $createdOrder = Order::create([
+            Order::create([
                 'user_id' => $user['id'],
                 'shop_id' => $shopOwner['id'],
                 'product_id' => $order['product_id'],
@@ -65,13 +65,14 @@ class OrderController extends Controller
                 'stock' => $stock
             ]);
 
-            $totalPrice = $product['price'] * $order['stock'];
+            $totalPrice = $order['stock'] * $product['price'];
 
             $details = [
                 'title' => 'Order placed',
                 'product' => $product,
                 'user' => $user,
-                'total' => $totalPrice
+                'total' => number_format($totalPrice, 2),
+                'stock' => $order['stock']
             ];
 
             Mail::to($shopMail['email'])->send(new OrderMail($details));
