@@ -37,7 +37,7 @@ class ShopController extends Controller
         $shop = Shop::where('user_id', $user['id'])->get()->first();
 
         if($shop){
-            return response('Only 1 shop allowed per user', 200);
+            return response('Only 1 shop allowed per user', 403);
         }
 
         $request->validate([
@@ -69,14 +69,15 @@ class ShopController extends Controller
             $filenameToStore = 'noimage.jpg';
         }
 
-        $user = auth()->user();
-
-        return Response(Shop::create([
+        $shop = Shop::create([
             'name' => $request->input('name'),
             'user_id' => $user['id'],
             'description' => $request->input('description'),
             'image_url' => '/storage/image/shops/' . $filenameToStore,
-        ]), 201);
+        ]);
+        $user->has_shop=true;
+        $user->save();
+        return Response($shop, 201);
     }
 
     /**
