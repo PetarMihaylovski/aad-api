@@ -29,7 +29,7 @@ Route::middleware(['cors'])->group(function () {
 
 
 //product routes
-Route::get('/products', [ProductController::class, 'index']);
+//Route::get('/products', [ProductController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
 Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
