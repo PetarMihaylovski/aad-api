@@ -1,3 +1,10 @@
+## Setup Guide
+1) I would assume you have php, composer and laravel installed, im sorry.
+2) ```npm install``` from the root to install dependencies
+3) ```composer install``` from the root to install php dependencies
+4) spin up the docker compose file
+
+
 ## Spin the docker-compose file
 
 0) make sure you have nothing running on port 80 and port 3306.
