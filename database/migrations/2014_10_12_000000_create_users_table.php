@@ -20,7 +20,6 @@ class CreateUsersTable extends Migration
             $table->string('password');
             $table->string('address');
             $table->string('postal');
-            $table->boolean('has_shop')->default(false);
             $table->rememberToken();
             $table->timestamps();
         });
