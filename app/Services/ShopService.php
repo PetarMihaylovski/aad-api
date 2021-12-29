@@ -2,9 +2,32 @@
 
 namespace App\Services;
 
+use App\Models\Shop;
+
 class ShopService
 {
     const FILE_DIRECTORY = 'public/image/shops';
+
+    /**
+     * @param $userId
+     * @param $name
+     * @param $description
+     * @param $storedName
+     * @return Shop
+     */
+    public function saveShop($userId, $name, $description, $storedName): Shop
+    {
+        return Shop::create([
+            'name' => $name,
+            'user_id' => $userId,
+            'description' => $description,
+            'image_url' =>
+                $storedName != null
+                    ? self::FILE_DIRECTORY . $storedName
+                    : null
+        ]);
+    }
+
 
     /**
      * @param $file ... the received image file
