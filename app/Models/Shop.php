@@ -16,8 +16,4 @@ class Shop extends Model
             'description',
             'image_url'
         ];
-
-    public function getProductsRelation(){
-        return $this->hasMany('App\Models\Product', 'shop_id', 'id');
-    }
 }
