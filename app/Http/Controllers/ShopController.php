@@ -2,13 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use GuzzleHttp\Psr7\Response;
+use App\Exceptions\CustomException;
+use App\Http\Resources\ShopCollection;
+use App\Http\Resources\ShopResource;
+use App\Services\ShopService;
 use Illuminate\Http\Request;
 use App\Models\Shop;
-use Symfony\Component\Console\Input\Input;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ShopController extends Controller
 {
+    private $shopService;
+
+    public function __construct(ShopService $shopService)
+    {
+        $this->shopService = $shopService;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -16,13 +26,7 @@ class ShopController extends Controller
      */
     public function index()
     {
-        return response(Shop::all(), 200);
-    }
-
-
-    public function getAllProdutsFromShop($id){
-        $shop = Shop::find($id);
-        return response($shops = $shop::with('getProductsRelation')->get(), 200);
+        return response(new ShopCollection(Shop::all()), ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -33,51 +37,35 @@ class ShopController extends Controller
      */
     public function store(Request $request)
     {
-        $user = auth()->user();
-        $shop = Shop::where('user_id', $user['id'])->get()->first();
-
-        if($shop){
-            return response('Only 1 shop allowed per user', 403);
-        }
-
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        if($request->hasFile('image_url')){
-            $path = $request->file('image_url');
+        $user = auth()->user();
 
-            $filenameWithExt = $request->file('image_url')->getClientOriginalName();
-
-            //Get filename
-            $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-            //$filename = basename($path, '.php');
-
-            //Get just extension
-            $extension = $request->file('image_url')->getClientOriginalExtension();
-
-            //Filename to store
-            $filenameToStore = $filename.'_'.time().'.'.$extension;
-
-            //Upload Imagepath
-            $request->file('image_url')->storeAs('public/image/shops', $filenameToStore);
-
-
-        }else{
-            $filenameToStore = 'noimage.jpg';
+        // throw error in case the user already owns a shop
+        if($user->has_shop){
+            throw new CustomException("A user cannot have more than 1 web shop",  ResponseAlias::HTTP_FORBIDDEN);
         }
 
-        $shop = Shop::create([
-            'name' => $request->input('name'),
-            'user_id' => $user['id'],
-            'description' => $request->input('description'),
-            'image_url' => '/storage/image/shops/' . $filenameToStore,
-        ]);
+       $storedImageName = null;
+        if($request->hasFile('image_url')){
+             $storedImageName = $this->shopService->storeImage($request->file('image_url'));
+        }
+
+        $shop = $this->shopService->saveShop(
+            $user['id'],
+            $request->input('name'),
+            $request->input('description'),
+            $storedImageName
+        );
+
         $user->has_shop=true;
         $user->save();
-        return Response($shop, 201);
+
+        return response(new ShopResource($shop), ResponseAlias::HTTP_CREATED);
     }
 
     /**
