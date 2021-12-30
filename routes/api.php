@@ -1,12 +1,10 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ShopController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ImageUploadController;
 use App\Http\Controllers\OrderController;
 
 /*
@@ -20,28 +18,22 @@ use App\Http\Controllers\OrderController;
 |
 */
 
-//shop routes
-Route::middleware(['cors'])->group(function () {
-    Route::get('/shops', [ShopController::class, 'index']);
-});
+// unrestricted
 
-
-
-
-//product routes
-//Route::get('/products', [ProductController::class, 'index']);
+//shop
+Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
+
+// product
 Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
-//user routes
+//auth
 Route::post('/register', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
 
-
-
-
+// restricted
 Route::group(['middleware' => ['auth:sanctum']], function () {
-    //user routes
+    //auth
     Route::get('/logout', [UserController::class, 'logout']);
 
     //shop routes
@@ -50,8 +42,8 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/shops/{id}', [ShopController::class, 'destroy']);
 
     //product routes
-    Route::post('/products/{id}', [ProductController::class, 'update']);
     Route::post('/product', [ProductController::class, 'store']);
+    Route::post('/products/{id}', [ProductController::class, 'update']);
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/products/{query}', [ProductController::class, 'filter']);
 
