@@ -16,4 +16,8 @@ class Shop extends Model
             'description',
             'image_url'
         ];
+
+    public function products(){
+        return $this->hasMany(Product::class, "shop_id");
+    }
 }
