@@ -2,30 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CustomException;
+use App\Http\Resources\ImageCollection;
+use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Image;
+use App\Services\ProductService;
+use App\Services\ShopService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductController extends Controller
 {
+    private $userService;
+    private $shopService;
+    private $productService;
+
+    public function __construct(UserService $userService,
+                                ShopService $shopService,
+                                ProductService $productService)
+    {
+        $this->userService = $userService;
+        $this->shopService = $shopService;
+        $this->productService = $productService;
+    }
+
     /**
-     * Return all products with images
+     * Display the specified resource.
      *
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function show($id)
     {
-        $products = Product::all();
-
-        $productsWithImages = [];
-        foreach ($products as $product) {
-            $images = Image::where('product_id', $product['id'])->get();
-            array_push($productsWithImages, $product, $images);
+        $shop = $this->shopService->getShopById($id);
+        if ($shop == null){
+            throw new CustomException("Shop with ID: {$id} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        return response($productsWithImages, 200);
+        $products = $this->productService->getProductsForShop($shop);
+        if ($products == null || $products->count() == 0) {
+            throw new CustomException("The shop with ID: {$id} does not have any products!", ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        $productsRsp = array();
+        // creates a product response, when fetching the images of the product
+        foreach ($products as $p){
+            // push the created resource to the response array
+            $productsRsp[] = new ProductResource($p->loadMissing(['images']));
+        }
+        return response($productsRsp, ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -91,27 +121,6 @@ class ProductController extends Controller
             $product->images = $imgs;
         }
         return response($product, 201);
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        $products = Product::where('shop_id', $id)->get();
-
-        if (!$products) {
-            return Response('Product does not exist', 404);
-        }
-
-        foreach ($products as $p) {
-            $images = Image::where('product_id', $p['id'])->get();
-            $p->images = $images;
-        }
-        return response($products, 200);
     }
 
     /**
