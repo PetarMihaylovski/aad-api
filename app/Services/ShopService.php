@@ -40,6 +40,24 @@ class ShopService
 
     /**
      * @param $shop
+     * @param $name
+     * @param $description
+     * @param $image_url
+     * @return Shop
+     */
+    public function updateShop($shop, $name, $description, $image_url = null): Shop
+    {
+        $shop->name = $name;
+        $shop->description = $description;
+        $shop->image_url = $image_url;
+
+        $shop->save();
+
+        return $shop;
+    }
+
+    /**
+     * @param $shop
      * @return void
      */
     public function deleteShop($shop): void

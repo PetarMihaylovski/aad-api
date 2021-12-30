@@ -99,17 +99,20 @@ class ShopController extends Controller
         if (!$this->userService->isShopOwner($shop)){
             throw new CustomException("Cannot edit a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
+
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'image_url' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $shop = $shop->update($request->only([
-            'name', 'description', 'image_url'
-        ]));
-
-        return response(new ShopResource($shop), ResponseAlias::HTTP_OK);
+        $updated = $this->shopService->updateShop(
+            $shop,
+            $request->input('name'),
+            $request->input('description'),
+            $request->input('image_url'),
+        );
+        return response(new ShopResource($updated), ResponseAlias::HTTP_OK);
     }
 
     /**
