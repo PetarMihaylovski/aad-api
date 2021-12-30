@@ -10,6 +10,14 @@ class ShopService
 
 
     /**
+     * @return Shop[]|\Illuminate\Database\Eloquent\Collection
+     */
+    public function getAllShops()
+    {
+        return Shop::all();
+    }
+
+    /**
      * @param $id
      * @return mixed
      */

@@ -15,8 +15,8 @@ class ShopResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'shop_id' => $this->id,
-            'owner_id' => $this->user_id,
+            'shopId' => $this->id,
+            'ownerId' => $this->user_id,
             'name' => $this->name,
             'descirption' => $this->description,
             'imageURL' => $this->image_url,

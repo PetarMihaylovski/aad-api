@@ -29,7 +29,7 @@ class ShopController extends Controller
      */
     public function index()
     {
-        return response(new ShopCollection(Shop::all()), ResponseAlias::HTTP_OK);
+        return response(new ShopCollection($this->shopService->getAllShops()), ResponseAlias::HTTP_OK);
     }
 
     /**
