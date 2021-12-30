@@ -76,7 +76,11 @@ class ShopController extends Controller
      */
     public function show($id)
     {
-        return Response(Shop::find($id), 200);
+        $shop = $this->shopService->getShopById($id);
+        if ($shop == null){
+            throw new CustomException("Shop with ID: {$id} not found!", ResponseAlias::HTTP_NOT_FOUND);
+        }
+        return response(new ShopResource($shop), ResponseAlias::HTTP_OK);
     }
 
     /**

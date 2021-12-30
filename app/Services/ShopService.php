@@ -8,6 +8,15 @@ class ShopService
 {
     const FILE_DIRECTORY = 'public/image/shops';
 
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function getShopById($id){
+        return Shop::find($id);
+    }
+
     /**
      * @param $userId
      * @param $name
