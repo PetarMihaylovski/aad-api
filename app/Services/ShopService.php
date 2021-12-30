@@ -13,7 +13,8 @@ class ShopService
      * @param $id
      * @return mixed
      */
-    public function getShopById($id){
+    public function getShopById($id)
+    {
         return Shop::find($id);
     }
 
@@ -35,6 +36,15 @@ class ShopService
                     ? self::FILE_DIRECTORY . $storedName
                     : null
         ]);
+    }
+
+    /**
+     * @param $shop
+     * @return void
+     */
+    public function deleteShop($shop): void
+    {
+        $shop->delete();
     }
 
 

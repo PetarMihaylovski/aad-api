@@ -6,6 +6,7 @@ use App\Exceptions\CustomException;
 use App\Http\Resources\ShopCollection;
 use App\Http\Resources\ShopResource;
 use App\Services\ShopService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use App\Models\Shop;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -13,10 +14,12 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 class ShopController extends Controller
 {
     private $shopService;
+    private $userService;
 
-    public function __construct(ShopService $shopService)
+    public function __construct(ShopService $shopService, UserService $userService)
     {
         $this->shopService = $shopService;
+        $this->userService = $userService;
     }
 
     /**
@@ -92,21 +95,21 @@ class ShopController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(!$this->isOwner($id)){
-            return response('Unauthenticated', 403);
+        $shop = $this->shopService->getShopById($id);
+        if (!$this->userService->isShopOwner($shop)){
+            throw new CustomException("Cannot edit a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
-
         $request->validate([
             'name' => 'required',
             'description' => 'required',
-            'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image_url' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $shop = Shop::find($id);
+        $shop = $shop->update($request->only([
+            'name', 'description', 'image_url'
+        ]));
 
-        $shop->update($request->all());
-
-        return response('Updated', 200);
+        return response(new ShopResource($shop), ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -117,28 +120,11 @@ class ShopController extends Controller
      */
     public function destroy($id)
     {
-        if(!$this->isOwner($id)){
-            return response('Unauthenticated', 403);
+        $shop = $this->shopService->getShopById($id);
+        if (!$this->userService->isShopOwner($shop)){
+            throw new CustomException("Cannot delete a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
-
-        Shop::destroy($id);
-        return response('Shop successfully deleted', 200);
-    }
-
-    /**
-     * Check if user is allowed for actions
-     *
-     * @param int $id
-     * @return bool
-     */
-    public function isOwner($id){
-        $user = auth()->user();
-        $shop = Shop::where('id', $id)->get()->first();
-
-        if($user['id'] !== $shop['user_id']){
-            return false;
-        }
-
-        return true;
+        $this->shopService->deleteShop($shop);
+        return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 }
