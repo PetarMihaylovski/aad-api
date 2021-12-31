@@ -5,21 +5,25 @@ namespace App\Http\Controllers;
 use App\Exceptions\CustomException;
 use App\Http\Resources\ShopCollection;
 use App\Http\Resources\ShopResource;
+use App\Services\ImageService;
 use App\Services\ShopService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Models\Shop;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ShopController extends Controller
 {
     private $shopService;
     private $userService;
+    private $imageService;
 
-    public function __construct(ShopService $shopService, UserService $userService)
+    public function __construct(UserService  $userService,
+                                ShopService  $shopService,
+                                ImageService $imageService)
     {
-        $this->shopService = $shopService;
         $this->userService = $userService;
+        $this->shopService = $shopService;
+        $this->imageService = $imageService;
     }
 
     /**
@@ -35,7 +39,7 @@ class ShopController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -49,13 +53,13 @@ class ShopController extends Controller
         $user = auth()->user();
 
         // throw error in case the user already owns a shop
-        if($user->has_shop){
-            throw new CustomException("A user cannot have more than 1 web shop",  ResponseAlias::HTTP_FORBIDDEN);
+        if ($user->has_shop) {
+            throw new CustomException("A user cannot have more than 1 web shop", ResponseAlias::HTTP_FORBIDDEN);
         }
 
-       $storedImageName = null;
-        if($request->hasFile('image_url')){
-             $storedImageName = $this->shopService->storeImage($request->file('image_url'));
+        $storedImageName = null;
+        if ($request->hasFile('image_url')) {
+            $storedImageName = $this->imageService->storeImage($request->file('image_url'), true);
         }
 
         $shop = $this->shopService->saveShop(
@@ -65,7 +69,7 @@ class ShopController extends Controller
             $storedImageName
         );
 
-        $user->has_shop=true;
+        $user->has_shop = true;
         $user->save();
 
         return response(new ShopResource($shop), ResponseAlias::HTTP_CREATED);
@@ -74,13 +78,13 @@ class ShopController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
         $shop = $this->shopService->getShopById($id);
-        if ($shop == null){
+        if ($shop == null) {
             throw new CustomException("Shop with ID: {$id} not found!", ResponseAlias::HTTP_NOT_FOUND);
         }
         return response(new ShopResource($shop), ResponseAlias::HTTP_OK);
@@ -89,14 +93,14 @@ class ShopController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param \Illuminate\Http\Request $request
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
         $shop = $this->shopService->getShopById($id);
-        if (!$this->userService->isShopOwner($shop)){
+        if (!$this->userService->isShopOwner($shop)) {
             throw new CustomException("Cannot edit a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
 
@@ -118,13 +122,13 @@ class ShopController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
         $shop = $this->shopService->getShopById($id);
-        if (!$this->userService->isShopOwner($shop)){
+        if (!$this->userService->isShopOwner($shop)) {
             throw new CustomException("Cannot delete a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
         $this->shopService->deleteShop($shop);
