@@ -166,13 +166,20 @@ class ProductController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($shopId, $productId)
     {
-        if (!$this->isOwner($id)) {
-            return response('Unauthenticated', 403);
+        $shop = $this->shopService->getShopById($shopId);
+        if (!$this->userService->isShopOwner($shop)) {
+            throw new CustomException("You cannot delete a product from a shop, that does not belong to you!",
+                ResponseAlias::HTTP_FORBIDDEN);
         }
-
-        return response(Product::destroy($id), 200);
+        $product = $this->productService->getProductById($productId);
+        if (!$product){
+            throw new CustomException("Product with ID {$productId} does not exist!",
+                ResponseAlias::HTTP_NOT_FOUND);
+        }
+        $this->productService->deleteProduct($product);
+        return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 
     /**

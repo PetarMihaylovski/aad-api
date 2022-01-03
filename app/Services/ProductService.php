@@ -9,15 +9,6 @@ class ProductService
 {
 
     /**
-     * @param $id
-     * @return mixed
-     */
-    public function getProductById($id)
-    {
-        return Product::find($id);
-    }
-
-    /**
      * @param int $shopId
      * @return mixed
      */
@@ -46,13 +37,22 @@ class ProductService
     }
 
     /**
+     * @param $id
+     * @return mixed
+     */
+    public function getProductById($id) : Product
+    {
+        return Product::find($id);
+    }
+
+    /**
      * @param $product
      * @param $name
      * @param $price
      * @param $stock
      * @param $category
      */
-    public function updateProduct($product, $name, $price, $stock, $category)
+    public function updateProduct($product, $name, $price, $stock, $category) : void
     {
         $product->name = $name;
         $product->price = $price;
@@ -60,5 +60,13 @@ class ProductService
         $product->category = $category;
 
         $product->save();
+    }
+
+    /**
+     * @param Product $product
+     * @return void
+     */
+    public function deleteProduct(Product $product) : void{
+        $product->delete();
     }
 }
