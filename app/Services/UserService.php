@@ -2,10 +2,25 @@
 
 namespace App\Services;
 
-use App\Models\Shop;
+use App\Models\User;
 
 class UserService
 {
+
+    /**
+     * @return User
+     */
+    public function getUser() : User {
+        return auth()->user();
+    }
+
+    /**
+     * @return void
+     */
+    public function removeOwnedShop() {
+        $this->getUser()->has_shop = false;
+        $this->getUser()->save();
+    }
 
     /**
      * @param $id

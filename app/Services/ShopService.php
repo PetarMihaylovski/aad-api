@@ -38,7 +38,7 @@ class ShopService
             'description' => $description,
             'image_url' =>
                 $storedName != null
-                    ? ImageService::SHOP_FILE_DIRECTORY . $storedName
+                    ? ImageService::SHOP_PUBLIC_DIRECTORY . $storedName
                     : null
         ]);
     }

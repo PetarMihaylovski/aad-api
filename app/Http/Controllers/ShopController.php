@@ -50,7 +50,7 @@ class ShopController extends Controller
             'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $user = auth()->user();
+        $user = $this->userService->getUser();
 
         // throw error in case the user already owns a shop
         if ($user->has_shop) {
@@ -132,6 +132,8 @@ class ShopController extends Controller
             throw new CustomException("Cannot delete a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
         $this->shopService->deleteShop($shop);
+        $this->userService->removeOwnedShop();
+
         return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 }
