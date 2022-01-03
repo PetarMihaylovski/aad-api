@@ -15,14 +15,16 @@ class ProductService
      */
     public function getProductsForShop(Shop $shop)
     {
-        return Product::where('shop_id', $shop->id)->get();
+        return Product::where('shop_id', $shop['id'])->get();
     }
 
-    /**
-     * @param Product $product
-     * @return mixed
-     */
-    public function getProductImages(Product $product){
-        return Image::where('product_id', $product['id'])->get();
+    public function saveProduct($shopId, $name, $price, $stock, $category):Product {
+        return Product::create([
+            'name' => $name,
+            'price' => $price,
+            'stock' => $stock,
+            'shop_id' => $shopId,
+            'category' => $category,
+        ]);
     }
 }

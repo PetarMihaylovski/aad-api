@@ -2,10 +2,15 @@
 
 namespace App\Services;
 
+use App\Models\Image;
+
 class ImageService
 {
-    const SHOP_FILE_DIRECTORY = 'public/image/shops';
-    const PRODUCT_FILE_DIRECTORY = 'public/image/products';
+    const SHOP_FILE_DIRECTORY = 'public/image/shops/';
+    const PRODUCT_FILE_DIRECTORY = 'public/image/products/';
+
+    const SHOP_PUBLIC_DIRECTORY = '/storage/image/shops/';
+    const PRODUCT_PUBLIC_DIRECTORY = '/storage/image/products/';
 
     /**
      * @param $file ... the received image file
@@ -19,12 +24,19 @@ class ImageService
         $extension = $file->getClientOriginalExtension();
         //Filename to store
         $storedName = $fileName . '_' . time() . '.' . $extension;
-        if ($isShop){
+        if ($isShop) {
             $file->storeAs(self::SHOP_FILE_DIRECTORY, $storedName);
-        }
-        else{
+        } else {
             $file->storeAs(self::PRODUCT_FILE_DIRECTORY, $storedName);
         }
         return $storedName;
+    }
+
+    public function saveImage($productId, $fileName): Image
+    {
+        return Image::create([
+            'product_id' => $productId,
+            'path' => self::PRODUCT_PUBLIC_DIRECTORY . $fileName
+        ]);
     }
 }

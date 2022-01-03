@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Image;
+use App\Services\ImageService;
 use App\Services\ProductService;
 use App\Services\ShopService;
 use App\Services\UserService;
@@ -21,37 +22,40 @@ class ProductController extends Controller
     private $userService;
     private $shopService;
     private $productService;
+    private $imageService;
 
-    public function __construct(UserService $userService,
-                                ShopService $shopService,
-                                ProductService $productService)
+    public function __construct(UserService    $userService,
+                                ShopService    $shopService,
+                                ProductService $productService,
+                                ImageService   $imageService)
     {
         $this->userService = $userService;
         $this->shopService = $shopService;
         $this->productService = $productService;
+        $this->imageService = $imageService;
     }
 
     /**
      * Display the specified resource.
      *
-     * @param int $id
+     * @param int $shopId
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($shopId)
     {
-        $shop = $this->shopService->getShopById($id);
-        if ($shop == null){
-            throw new CustomException("Shop with ID: {$id} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
+        $shop = $this->shopService->getShopById($shopId);
+        if ($shop == null) {
+            throw new CustomException("Shop with ID: {$shopId} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
         $products = $this->productService->getProductsForShop($shop);
         if ($products == null || $products->count() == 0) {
-            throw new CustomException("The shop with ID: {$id} does not have any products!", ResponseAlias::HTTP_NOT_FOUND);
+            throw new CustomException("The shop with ID: {$shopId} does not have any products!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
         $productsRsp = array();
         // creates a product response, when fetching the images of the product
-        foreach ($products as $p){
+        foreach ($products as $p) {
             // push the created resource to the response array
             $productsRsp[] = new ProductResource($p->loadMissing(['images']));
         }
@@ -64,7 +68,7 @@ class ProductController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $shopId)
     {
         $request->validate([
             'name' => 'required',
@@ -76,51 +80,44 @@ class ProductController extends Controller
             'imageThree' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048'
         ]);
 
+        // when here, shop exists for sure, so no need to check
+        $shop = $this->shopService->getShopById($shopId);
+        $userIsOwner = $this->userService->isShopOwner($shop);
 
-        $user = auth()->user();
-        $shop = Shop::where('user_id', $user['id'])->get()->first();
-
-
-        $product = Product::create([
-            'name' => $request->input('name'),
-            'price' => $request->input('price'),
-            'stock' => $request->input('stock'),
-            'shop_id' => $shop['id'],
-            'category' => $request->input('category'),
-        ]);
-
-        if ($request->hasFile('imageOne')) {
-            $images = [];
-            array_push($images, $request->file('imageOne'));
-            array_push($images, $request->file('imageTwo'));
-            array_push($images, $request->file('imageThree'));
-
-            $imgs = [];
-
-            // all three images are saved withing the same timestamp
-            // so this counter gives them a unique part
-            foreach ($images as $image) {
-                $filenameWithExt = $image->getClientOriginalName();
-                //Get filename
-                $filename = pathinfo($filenameWithExt, PATHINFO_FILENAME);
-
-                //Get just extension
-                $extension = $image->getClientOriginalExtension();
-
-                //Filename to store
-                $filenameToStore = Str::uuid() . '_' . time() . '.' . $extension;
-
-                //Upload Imagepath
-                $image->storeAs('public/image/products/', $filenameToStore);
-
-                 array_push($imgs, Image::create([
-                    'product_id' => $product['id'],
-                    'path' => '/storage/image/products/' . $filenameToStore
-                ]));
-            }
-            $product->images = $imgs;
+        if (!$userIsOwner) {
+            throw new CustomException("You cannot add products to shop that you do not own!",
+                ResponseAlias::HTTP_FORBIDDEN);
         }
-        return response($product, 201);
+
+        $product = $this->productService->saveProduct(
+            $shop['id'],
+            $request->input('name'),
+            $request->input('price'),
+            $request->input('stock'),
+            $request->input('category')
+        );
+
+        $maxImages = 3;
+        // dynamically builds the image index,
+        // based on the number of attached files in the request
+        for ($numIndex = 1; $numIndex <= $maxImages; $numIndex++) {
+            $key = 'image';
+            if ($numIndex == 1) {
+                $key .= 'One';
+            } else if ($numIndex == 2) {
+                $key .= 'Two';
+            } else {
+                $key .= 'Three';
+            }
+
+            if ($request->hasFile($key)) {
+                $imageFile = $request->file($key);
+                $fileName = $this->imageService->storeImage($imageFile, false);
+
+                $this->imageService->saveImage($product['id'], $fileName);
+            }
+        }
+        return response(new ProductResource($product->loadMissing(['images'])), ResponseAlias::HTTP_CREATED);
     }
 
     /**

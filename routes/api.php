@@ -42,9 +42,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::delete('/shops/{id}', [ShopController::class, 'destroy']);
 
     //product routes
-    Route::post('/product', [ProductController::class, 'store']);
-    Route::post('/products/{id}', [ProductController::class, 'update']);
-    Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+    Route::post('/shops/{shopId}/products', [ProductController::class, 'store']);
+    Route::patch('/shops/{shopId}/products/{productId}', [ProductController::class, 'update']);
+    Route::delete('/shops/{shopId}/products/{productId}', [ProductController::class, 'destroy']);
     Route::get('/products/{query}', [ProductController::class, 'filter']);
 
     //order routes
