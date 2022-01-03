@@ -32,10 +32,16 @@ class ImageService
         return $storedName;
     }
 
+    /**
+     * @param $productId
+     * @param $fileName
+     * @return Image
+     */
     public function saveImage($productId, $fileName): Image
     {
         return Image::create([
             'product_id' => $productId,
+            'name' => $fileName,
             'path' => self::PRODUCT_PUBLIC_DIRECTORY . $fileName
         ]);
     }
