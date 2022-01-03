@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CustomException;
-use App\Http\Resources\ImageCollection;
-use App\Http\Resources\ProductCollection;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use App\Models\Shop;
@@ -14,7 +12,7 @@ use App\Services\ProductService;
 use App\Services\ShopService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductController extends Controller
@@ -127,10 +125,21 @@ class ProductController extends Controller
      * @param int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $shopId, $productId)
     {
-        if (!$this->isOwner($id)) {
-            return response('Unauthenticated', 403);
+        $shop = $this->shopService->getShopById($shopId);
+        if (!$shop){
+            throw new CustomException("Shop with ID: {$shopId} not found!",
+                ResponseAlias::HTTP_NOT_FOUND);
+        }
+        if (!$this->userService->isShopOwner($shop)) {
+            throw new CustomException("You cannot edit a product from a shop, that does not belong to you!",
+                ResponseAlias::HTTP_FORBIDDEN);
+        }
+        $product = $this->productService->getProductById($productId);
+        if (!$product){
+            throw new CustomException("Product with ID {$productId} does not exist!",
+                ResponseAlias::HTTP_NOT_FOUND);
         }
 
         $request->validate([
@@ -140,11 +149,15 @@ class ProductController extends Controller
             'category' => 'required',
         ]);
 
-        $product = Product::find($id);
+        $this->productService->updateProduct(
+            $product,
+            $request->input(['name'   ]),
+            $request->input('price'),
+            $request->input('stock'),
+            $request->input('category'),
+        );
 
-        $product->update($request->all());
-
-        return response($product, 200);
+        return response(null, 200);
     }
 
     /**
@@ -173,24 +186,5 @@ class ProductController extends Controller
         $products = Product::where('category', $query)->get();
 
         return response($products, 200);
-    }
-
-    /**
-     * Check if user is allowed for actions
-     *
-     * @param int $id
-     * @return bool
-     */
-    public function isOwner($id)
-    {
-        $user = auth()->user();
-        $shop = Shop::where('user_id', $user['id'])->get()->first();
-        $product = Product::find($id);
-
-        if ($product['shop_id'] !== $shop['id']) {
-            return false;
-        }
-
-        return true;
     }
 }
