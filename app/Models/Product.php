@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class Product extends Model
 {
@@ -41,7 +44,15 @@ class Product extends Model
         parent::boot();
 
         static::deleting(function ($product) {
-            $product->images()->delete();
+            $images = $product->images();
+
+            // delete the images in the storage for the given product
+            $images->each(function ($img){
+                Storage::delete(ImageService::PRODUCT_FILE_DIRECTORY . $img->name);
+            });
+
+            // deletes the database records
+            $images->delete();
         });
     }
 }

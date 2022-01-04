@@ -3,14 +3,15 @@
 namespace App\Services;
 
 use App\Models\Image;
+use Illuminate\Support\Facades\Storage;
 
 class ImageService
 {
-    const SHOP_FILE_DIRECTORY = 'public/image/shops/';
-    const PRODUCT_FILE_DIRECTORY = 'public/image/products/';
+    const SHOP_FILE_DIRECTORY = 'public/images/shops/';
+    const PRODUCT_FILE_DIRECTORY = 'public/images/products/';
 
-    const SHOP_PUBLIC_DIRECTORY = '/storage/image/shops/';
-    const PRODUCT_PUBLIC_DIRECTORY = '/storage/image/products/';
+    const SHOP_PUBLIC_DIRECTORY = '/storage/images/shops/';
+    const PRODUCT_PUBLIC_DIRECTORY = '/storage/images/products/';
 
     /**
      * @param $file ... the received image file
@@ -25,9 +26,9 @@ class ImageService
         //Filename to store
         $storedName = $fileName . '_' . time() . '.' . $extension;
         if ($isShop) {
-            $file->storeAs(self::SHOP_FILE_DIRECTORY, $storedName);
+            Storage::putFileAs(self::SHOP_FILE_DIRECTORY, $file, $storedName);
         } else {
-            $file->storeAs(self::PRODUCT_FILE_DIRECTORY, $storedName);
+            Storage::putFileAs(self::PRODUCT_FILE_DIRECTORY, $file, $storedName);
         }
         return $storedName;
     }
