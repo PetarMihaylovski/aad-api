@@ -8,6 +8,7 @@ use App\Services\ImageService;
 use App\Services\ProductService;
 use App\Services\ShopService;
 use App\Services\UserService;
+use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -17,16 +18,19 @@ class ProductController extends Controller
     private $shopService;
     private $productService;
     private $imageService;
+    private $validatorService;
 
-    public function __construct(UserService    $userService,
-                                ShopService    $shopService,
-                                ProductService $productService,
-                                ImageService   $imageService)
+    public function __construct(UserService      $userService,
+                                ShopService      $shopService,
+                                ProductService   $productService,
+                                ImageService     $imageService,
+                                ValidatorService $validatorService)
     {
         $this->userService = $userService;
         $this->shopService = $shopService;
         $this->productService = $productService;
         $this->imageService = $imageService;
+        $this->validatorService = $validatorService;
     }
 
     /**
@@ -42,16 +46,16 @@ class ProductController extends Controller
             throw new CustomException("Shop with ID: {$shopId} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        if ($request->has('category')){
-            // if statement has no score, so no need to define it outside as well
+        if ($request->has('category')) {
+            // if statement has no scope, so no need to define it outside as well
             $category = $request->query('category');
             $products = $this->productService->getProductsForShop($shop, $category);
-        }else{
+        } else {
             $products = $this->productService->getProductsForShop($shop);
         }
 
         if ($products == null || $products->count() == 0) {
-            if ($category){
+            if ($category) {
                 throw new CustomException("The shop with ID: {$shopId} does not have any products matching the {$category} category!!", ResponseAlias::HTTP_NOT_FOUND);
             }
             throw new CustomException("The shop with ID: {$shopId} does not have any products!", ResponseAlias::HTTP_NOT_FOUND);
@@ -74,7 +78,7 @@ class ProductController extends Controller
      */
     public function store(Request $request, $shopId)
     {
-        $request->validate([
+        $this->validatorService->validate($request->all(),[
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
@@ -134,7 +138,7 @@ class ProductController extends Controller
     public function update(Request $request, $shopId, $productId)
     {
         $shop = $this->shopService->getShopById($shopId);
-        if (!$shop){
+        if (!$shop) {
             throw new CustomException("Shop with ID: {$shopId} not found!",
                 ResponseAlias::HTTP_NOT_FOUND);
         }
@@ -143,12 +147,12 @@ class ProductController extends Controller
                 ResponseAlias::HTTP_FORBIDDEN);
         }
         $product = $this->productService->getProductById($productId);
-        if (!$product){
+        if (!$product) {
             throw new CustomException("Product with ID {$productId} does not exist!",
                 ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        $request->validate([
+        $this->validatorService->validate($request->all(),[
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
@@ -180,7 +184,7 @@ class ProductController extends Controller
                 ResponseAlias::HTTP_FORBIDDEN);
         }
         $product = $this->productService->getProductById($productId);
-        if (!$product){
+        if (!$product) {
             throw new CustomException("Product with ID {$productId} does not exist!",
                 ResponseAlias::HTTP_NOT_FOUND);
         }
