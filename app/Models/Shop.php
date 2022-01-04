@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Shop extends Model
 {
@@ -14,7 +16,8 @@ class Shop extends Model
             'name',
             'user_id',
             'description',
-            'image_url'
+            'image_url',
+            'image_name'
         ];
 
     public function products()
@@ -34,6 +37,9 @@ class Shop extends Model
         parent::boot();
 
         static::deleting(function ($shop) {
+            //deletes the stored image file
+            Storage::delete(ImageService::SHOP_FILE_DIRECTORY . $shop->image_name);
+
             // deletes every product one by one,
             // so the before-delete callback in product
             // gets called
