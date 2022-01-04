@@ -65,7 +65,7 @@ class ShopService
      * @param $shop
      * @return void
      */
-    public function deleteShop($shop): void
+    public function deleteShop(Shop $shop): void
     {
         $shop->delete();
     }
