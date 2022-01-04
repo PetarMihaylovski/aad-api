@@ -12,9 +12,16 @@ class ProductService
      * @param int $shopId
      * @return mixed
      */
-    public function getProductsForShop(Shop $shop)
+    public function getProductsForShop(Shop $shop, string $category=null)
     {
-        return Product::where('shop_id', $shop['id'])->get();
+        if ($category){
+            // returns only the products from the required category
+            return $shop->products()->where('category', $category)->get();
+        }
+        else{
+            // no explicit category wanted, so return all products
+            return $shop->products();
+        }
     }
 
     /**

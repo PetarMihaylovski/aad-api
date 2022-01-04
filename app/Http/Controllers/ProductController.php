@@ -4,15 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\CustomException;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
-use App\Models\Shop;
-use App\Models\Image;
 use App\Services\ImageService;
 use App\Services\ProductService;
 use App\Services\ShopService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class ProductController extends Controller
@@ -39,15 +35,25 @@ class ProductController extends Controller
      * @param int $shopId
      * @return \Illuminate\Http\Response
      */
-    public function show($shopId)
+    public function show(Request $request, int $shopId)
     {
         $shop = $this->shopService->getShopById($shopId);
         if ($shop == null) {
             throw new CustomException("Shop with ID: {$shopId} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
-        $products = $this->productService->getProductsForShop($shop);
+        if ($request->has('category')){
+            // if statement has no score, so no need to define it outside as well
+            $category = $request->query('category');
+            $products = $this->productService->getProductsForShop($shop, $category);
+        }else{
+            $products = $this->productService->getProductsForShop($shop);
+        }
+
         if ($products == null || $products->count() == 0) {
+            if ($category){
+                throw new CustomException("The shop with ID: {$shopId} does not have any products matching the {$category} category!!", ResponseAlias::HTTP_NOT_FOUND);
+            }
             throw new CustomException("The shop with ID: {$shopId} does not have any products!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
@@ -151,7 +157,7 @@ class ProductController extends Controller
 
         $this->productService->updateProduct(
             $product,
-            $request->input(['name'   ]),
+            $request->input('name'),
             $request->input('price'),
             $request->input('stock'),
             $request->input('category'),
@@ -180,18 +186,5 @@ class ProductController extends Controller
         }
         $this->productService->deleteProduct($product);
         return response(null, ResponseAlias::HTTP_NO_CONTENT);
-    }
-
-    /**
-     * Get resources with specific category
-     *
-     * @param int $query
-     * @return \Illuminate\Http\Response
-     */
-    public function filter($query)
-    {
-        $products = Product::where('category', $query)->get();
-
-        return response($products, 200);
     }
 }

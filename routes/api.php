@@ -45,7 +45,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/shops/{shopId}/products', [ProductController::class, 'store']);
     Route::patch('/shops/{shopId}/products/{productId}', [ProductController::class, 'update']);
     Route::delete('/shops/{shopId}/products/{productId}', [ProductController::class, 'destroy']);
-    Route::get('/products/{query}', [ProductController::class, 'filter']);
 
     //order routes
     Route::post('/orders', [OrderController::class, 'store']);
