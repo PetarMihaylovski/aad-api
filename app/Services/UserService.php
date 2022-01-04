@@ -45,9 +45,9 @@ class UserService
     /**
      * @return void
      */
-    public function removeOwnedShop()
+    public function setOwnShop(bool $owns)
     {
-        $this->getAuthUser()->has_shop = false;
+        $this->getAuthUser()->has_shop = $owns;
         $this->getAuthUser()->save();
     }
 

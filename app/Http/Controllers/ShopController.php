@@ -8,6 +8,7 @@ use App\Http\Resources\ShopResource;
 use App\Services\ImageService;
 use App\Services\ShopService;
 use App\Services\UserService;
+use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -16,14 +17,17 @@ class ShopController extends Controller
     private $shopService;
     private $userService;
     private $imageService;
+    private $validatorService;
 
-    public function __construct(UserService  $userService,
-                                ShopService  $shopService,
-                                ImageService $imageService)
+    public function __construct(UserService      $userService,
+                                ShopService      $shopService,
+                                ImageService     $imageService,
+                                ValidatorService $validatorService)
     {
         $this->userService = $userService;
         $this->shopService = $shopService;
         $this->imageService = $imageService;
+        $this->validatorService = $validatorService;
     }
 
     /**
@@ -44,18 +48,18 @@ class ShopController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
         $user = $this->userService->getAuthUser();
 
         // throw error in case the user already owns a shop
         if ($user->has_shop) {
             throw new CustomException("A user cannot have more than 1 web shop", ResponseAlias::HTTP_FORBIDDEN);
         }
+
+        $this->validatorService->validate($request->all(),[
+            'name' => 'required',
+            'description' => 'required',
+            'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
 
         $storedImageName = null;
         if ($request->hasFile('image_url')) {
@@ -68,9 +72,7 @@ class ShopController extends Controller
             $request->input('description'),
             $storedImageName
         );
-
-        $user->has_shop = true;
-        $user->save();
+        $this->userService->setOwnShop(true);
 
         return response(new ShopResource($shop), ResponseAlias::HTTP_CREATED);
     }
@@ -104,17 +106,15 @@ class ShopController extends Controller
             throw new CustomException("Cannot edit a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
 
-        $request->validate([
+        $this->validatorService->validate($request->all(),[
             'name' => 'required',
             'description' => 'required',
-            'image_url' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         $updated = $this->shopService->updateShop(
             $shop,
             $request->input('name'),
             $request->input('description'),
-            $request->input('image_url'),
         );
         return response(new ShopResource($updated), ResponseAlias::HTTP_OK);
     }
@@ -132,7 +132,7 @@ class ShopController extends Controller
             throw new CustomException("Cannot delete a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
         }
         $this->shopService->deleteShop($shop);
-        $this->userService->removeOwnedShop();
+        $this->userService->setOwnShop(false);
 
         return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
