@@ -50,7 +50,7 @@ class ShopController extends Controller
             'image_url' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
-        $user = $this->userService->getUser();
+        $user = $this->userService->getAuthUser();
 
         // throw error in case the user already owns a shop
         if ($user->has_shop) {

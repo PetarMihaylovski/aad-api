@@ -17,9 +17,10 @@ class UserResource extends JsonResource
         return [
             'username' => $this->username,
             'email' => $this->email,
-            'address' => $this->address . " " . $this->postal,
-            'isShopOwner' => $this->has_shop,
-            'created'=> $this->created_at
+            'address' => $this->address,
+            'postal' => $this->postal,
+            'isShopOwner' => $this->has_shop == 1, // so it evaluates to boolean, not as number
+            'created' => $this->created_at
         ];
     }
 }

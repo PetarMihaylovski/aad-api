@@ -10,25 +10,55 @@ class UserService
     /**
      * @return User
      */
-    public function getUser() : User {
+    public function getAuthUser(): User
+    {
         return auth()->user();
+    }
+
+    /**
+     * @param string $email
+     * @return mixed
+     */
+    public function getUserByEmail(string $email)
+    {
+        return User::where('email', $email)->firstOrFail();
+    }
+
+    /**
+     * @param $username
+     * @param $email
+     * @param $password
+     * @param $address
+     * @param $postal
+     * @return User
+     */
+    public function createUser($username, $email, $password, $address, $postal) : User{
+        return User::create([
+            'username' => $username,
+            'email' => $email,
+            'password' => bcrypt($password),
+            'address' => $address,
+            'postal' => $postal,
+        ]);
     }
 
     /**
      * @return void
      */
-    public function removeOwnedShop() {
-        $this->getUser()->has_shop = false;
-        $this->getUser()->save();
+    public function removeOwnedShop()
+    {
+        $this->getAuthUser()->has_shop = false;
+        $this->getAuthUser()->save();
     }
 
     /**
      * @param $id
      * @return bool
      */
-    public function isShopOwner($shop){
+    public function isShopOwner($shop)
+    {
         $user = auth()->user();
-        if ($user->has_shop){
+        if ($user->has_shop) {
             return $user['id'] === $shop['user_id'];
         }
         return false;

@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ShopController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
 
@@ -28,13 +28,13 @@ Route::get('/shops/{id}', [ShopController::class, 'show']);
 Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
 //auth
-Route::post('/register', [UserController::class, 'store']);
-Route::post('/login', [UserController::class, 'login']);
+Route::post('/register', [AuthController::class, 'store']);
+Route::post('/login', [AuthController::class, 'login']);
 
 // restricted
 Route::group(['middleware' => ['auth:sanctum']], function () {
     //auth
-    Route::get('/logout', [UserController::class, 'logout']);
+    Route::get('/logout', [AuthController::class, 'logout']);
 
     //shop routes
     Route::post('/shops', [ShopController::class, 'store']);
