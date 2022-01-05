@@ -19,7 +19,7 @@ class ProductService
             return $shop->products()->where('category', $category)->get();
         } else {
             // no explicit category wanted, so return all products
-            return $shop->products();
+            return $shop->products()->get();
         }
     }
 
@@ -83,9 +83,8 @@ class ProductService
      * @param $orderQuantity
      * @return bool
      */
-    public function isInStock(Product $product, $orderQuantity) : bool{
-        var_dump($product['stock']);
-        return $product->stock > 0 && ($product->stock - $orderQuantity > 0);
+    public function isInStock(Product $product, int $orderQuantity) : bool{
+        return $product['stock'] > 0 && ($product['stock'] - $orderQuantity >= 0);
     }
 
     public function decrementStock($product, $orderedQuantity){
