@@ -12,16 +12,24 @@ class ProductService
      * @param int $shopId
      * @return mixed
      */
-    public function getProductsForShop(Shop $shop, string $category=null)
+    public function getAllProducts(Shop $shop, string $category = null)
     {
-        if ($category){
+        if ($category) {
             // returns only the products from the required category
             return $shop->products()->where('category', $category)->get();
-        }
-        else{
+        } else {
             // no explicit category wanted, so return all products
             return $shop->products();
         }
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function getProductById(Shop $shop, int $id)
+    {
+        return $shop->products()->where('id', $id)->get();
     }
 
     /**
@@ -44,22 +52,13 @@ class ProductService
     }
 
     /**
-     * @param $id
-     * @return mixed
-     */
-    public function getProductById($id) : Product
-    {
-        return Product::find($id);
-    }
-
-    /**
      * @param $product
      * @param $name
      * @param $price
      * @param $stock
      * @param $category
      */
-    public function updateProduct($product, $name, $price, $stock, $category) : void
+    public function updateProduct($product, $name, $price, $stock, $category): void
     {
         $product->name = $name;
         $product->price = $price;
@@ -73,7 +72,8 @@ class ProductService
      * @param Product $product
      * @return void
      */
-    public function deleteProduct(Product $product) : void{
+    public function deleteProduct(Product $product): void
+    {
         $product->delete();
     }
 }

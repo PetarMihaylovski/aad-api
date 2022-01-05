@@ -39,7 +39,7 @@ class ProductController extends Controller
      * @param int $shopId
      * @return \Illuminate\Http\Response
      */
-    public function show(Request $request, int $shopId)
+    public function index(Request $request, int $shopId)
     {
         $shop = $this->shopService->getShopById($shopId);
         if ($shop == null) {
@@ -49,9 +49,9 @@ class ProductController extends Controller
         if ($request->has('category')) {
             // if statement has no scope, so no need to define it outside as well
             $category = $request->query('category');
-            $products = $this->productService->getProductsForShop($shop, $category);
+            $products = $this->productService->getAllProducts($shop, $category);
         } else {
-            $products = $this->productService->getProductsForShop($shop);
+            $products = $this->productService->getAllProducts($shop);
         }
 
         if ($products == null || $products->count() == 0) {
@@ -146,7 +146,7 @@ class ProductController extends Controller
             throw new CustomException("You cannot edit a product from a shop, that does not belong to you!",
                 ResponseAlias::HTTP_FORBIDDEN);
         }
-        $product = $this->productService->getProductById($productId);
+        $product = $this->productService->getProductById($shop, $productId);
         if (!$product) {
             throw new CustomException("Product with ID {$productId} does not exist!",
                 ResponseAlias::HTTP_NOT_FOUND);
@@ -183,7 +183,7 @@ class ProductController extends Controller
             throw new CustomException("You cannot delete a product from a shop, that does not belong to you!",
                 ResponseAlias::HTTP_FORBIDDEN);
         }
-        $product = $this->productService->getProductById($productId);
+        $product = $this->productService->getProductById($shop, $productId);
         if (!$product) {
             throw new CustomException("Product with ID {$productId} does not exist!",
                 ResponseAlias::HTTP_NOT_FOUND);
