@@ -17,14 +17,10 @@ class CreateOrdersTable extends Migration
             $table->id()->autoIncrement();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shop_id');
-            $table->integer('product_id');
-            $table->integer('stock');
-            $table->decimal('price', 5, 2);
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
             $table->foreign('shop_id')->references('id')->on('shops');
-
         });
     }
 
