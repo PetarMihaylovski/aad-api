@@ -6,22 +6,32 @@ use App\Mail\OrderMail;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\User;
+use App\Services\ImageService;
+use App\Services\ProductService;
+use App\Services\ShopService;
+use App\Services\UserService;
+use App\Services\ValidatorService;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        $user = auth()->user();
 
-        $orders = Order::where('user_id', $user['id'])->get();
+    private $userService;
+    private $shopService;
+    private $productService;
+    private $validatorService;
+
+    public function __construct(UserService      $userService,
+                                ShopService      $shopService,
+                                ProductService   $productService,
+                                ValidatorService $validatorService)
+    {
+        $this->userService = $userService;
+        $this->shopService = $shopService;
+        $this->productService = $productService;
+        $this->validatorService = $validatorService;
     }
 
     /**
@@ -32,19 +42,17 @@ class OrderController extends Controller
      */
     public function store(Request $request)
     {
-        $orders = $request->validate([
-            '*.product_id' => 'required',
-            '*.stock' => 'required',
+        $this->validatorService->validate($request->all(),[
+            'shop_id' => 'required|integer',
+            'products.*.product_id' => 'required|integer',
+            'products.*.quantity' => 'required|integer'
         ]);
 
-        $user = auth()->user();
-
-        foreach ($orders as $order){
-
+        $user = $this->userService->getAuthUser();
+        foreach ($request['products'] as $order){
 
             $shopOwner = Shop::where('user_id', $user['id'])->first();
             $shopMail = User::where('id', $shopOwner['user_id'])->first();
-
             $product = Product::find($order['product_id']);
 
             Order::create([
@@ -87,29 +95,6 @@ class OrderController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
     {
         //
     }
