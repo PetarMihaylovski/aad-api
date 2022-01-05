@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CustomException;
+use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\ProductResource;
+use App\Models\Order;
 use App\Services\OrderService;
 use App\Services\ProductService;
 use App\Services\ShopService;
@@ -33,6 +36,13 @@ class OrderController extends Controller
         $this->productService = $productService;
         $this->orderService = $orderService;
         $this->validatorService = $validatorService;
+    }
+
+    public function index(){
+        $user = $this->userService->getAuthUser();
+        $orders = $this->orderService->getOrdersByUserId($user['id']);
+
+        return response(OrderResource::collection($orders->loadMissing(['items'])), ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -103,6 +113,6 @@ class OrderController extends Controller
      */
     public function show($id)
     {
-        //
+
     }
 }

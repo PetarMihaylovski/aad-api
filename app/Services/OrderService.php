@@ -14,6 +14,10 @@ class OrderService
         $this->productService = $productService;
     }
 
+    public function getOrdersByUserId($userId){
+        return Order::where('user_id', $userId)->get();
+    }
+
     public function createOrder($userId, $shopId){
         return Order::create([
             'user_id' => $userId,

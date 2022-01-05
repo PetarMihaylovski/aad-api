@@ -34,16 +34,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
-
     public function shop(){
         return $this->hasOne(Shop::class, 'user_id');
+    }
+
+    public function orders(){
+        return $this->hasMany(Order::class, 'user_id');
     }
 }
