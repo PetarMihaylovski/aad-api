@@ -29,7 +29,7 @@ class ProductService
      */
     public function getProductById(Shop $shop, int $id)
     {
-        return $shop->products()->where('id', $id)->get();
+        return $shop->products()->where('id', $id)->first();
     }
 
     /**
@@ -75,5 +75,21 @@ class ProductService
     public function deleteProduct(Product $product): void
     {
         $product->delete();
+    }
+
+    /**
+     *
+     * @param $product
+     * @param $orderQuantity
+     * @return bool
+     */
+    public function isInStock(Product $product, $orderQuantity) : bool{
+        var_dump($product['stock']);
+        return $product->stock > 0 && ($product->stock - $orderQuantity > 0);
+    }
+
+    public function decrementStock($product, $orderedQuantity){
+        $product->stock -= $orderedQuantity;
+        $product->save();
     }
 }

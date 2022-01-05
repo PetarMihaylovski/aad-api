@@ -39,7 +39,7 @@ class ProductController extends Controller
      * @param int $shopId
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request, int $shopId)
+    public function show(Request $request, int $shopId)
     {
         $shop = $this->shopService->getShopById($shopId);
         if ($shop == null) {

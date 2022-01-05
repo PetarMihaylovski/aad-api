@@ -25,7 +25,7 @@ Route::get('/shops', [ShopController::class, 'index']);
 Route::get('/shops/{id}', [ShopController::class, 'show']);
 
 // product
-Route::get('/shops/{id}/products', [ProductController::class, 'index']);
+Route::get('/shops/{id}/products', [ProductController::class, 'show']);
 
 //auth
 Route::post('/register', [AuthController::class, 'store']);
