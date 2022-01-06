@@ -113,6 +113,14 @@ class OrderController extends Controller
      */
     public function show($id)
     {
+        $user = $this->userService->getAuthUser();
+        $order = $this->orderService->getOrderByOrderId($user['id'], $id);
 
+        if ($order == null){
+            throw new CustomException("Order with ID: {$id} does not exist!",
+                ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        return response(new OrderResource($order->loadMissing(['items'])));
     }
 }

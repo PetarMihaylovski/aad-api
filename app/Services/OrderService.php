@@ -18,6 +18,13 @@ class OrderService
         return Order::where('user_id', $userId)->get();
     }
 
+    public function getOrderByOrderId($userId, $orderId){
+        return Order::where([
+            ['user_id', $userId],
+            ['id', $orderId]
+        ])->first();
+    }
+
     public function createOrder($userId, $shopId){
         return Order::create([
             'user_id' => $userId,
