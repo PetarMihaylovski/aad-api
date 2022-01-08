@@ -1,0 +1,589 @@
+openapi: 3.0.0
+info:
+  title: AAD REST API
+  version: 2.0.0
+paths:
+  /api/register:
+    post:
+      tags:
+        - Auth
+      description: Registers a user, in order to access to the resticted API endpoints
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: The User has successfully been registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/400ApiError'
+          
+  /api/login:
+    post:
+      tags:
+        - Auth
+      description:
+        Authenticates a user, by signing a token to access to the resticted API
+        endpoints
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+      responses:
+        '200':
+          description: The User has successfully been authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 2|LodYlmTROopLebWJw5ZyXhz29vVoltEY9AWRMC
+        '400':
+          $ref: '#/components/responses/400ApiError'
+        '401':
+          description: The User has entered wrong credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Wrong credentials provided
+                    
+  /api/logout:
+    get:
+      tags:
+        - Auth
+      description: Deletes the token, thus logging the user out
+      responses:
+        '204':
+          description: Successfully logged the user out
+          
+  /api/shops:
+    get:
+      tags:
+        - Unrestricted
+      responses:
+        '200':
+          description: Returns all available shops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Shop'
+    post:
+      tags:
+      - Unrestricted
+      description: Store a new web shop
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShopInput'
+      responses:
+        '201':
+          description: Resource Successfully Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shop'
+        '400':
+          $ref: '#/components/responses/400ApiError'
+        '401':
+          $ref: '#/components/responses/401ApiError'
+          
+  /api/shops/{id}:
+    get:
+      tags:
+        - Unrestricted
+      description: Get a specific shop by its id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Resource Successfully Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shop'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+    patch:
+      tags:
+        - Restricted
+      description: Updates a Shop By Id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ShopInput'
+      responses:
+        '204':
+          description: Resource Updated Successfully
+        '403':
+          $ref: '#/components/responses/403ApiError'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+    delete:
+      tags:
+        - Restricted
+      description: Deletes a Shop Resouce By Id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '204':
+          description: Resource Deleted Successfully
+        '403':
+          $ref: '#/components/responses/403ApiError'
+          
+  /api/shops/{shopId}/products:
+    get:
+      tags:
+      -  Unrestricted
+      description: Returns all available products for a given shop
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: query
+          name: category
+          description: Optional category to filter by
+          schema:
+            type: string
+            example: shoes
+      responses:
+        '200':
+          description: Resources Successfully Fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+    
+    post:
+      tags:
+        - Restricted
+      description: Store a new product
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema:
+            type: string
+            example: 1
+      requestBody:
+        content:
+          multipart/form-data:
+               schema:
+                $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Resource stored successfully
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/400ApiError'
+        '403':
+          $ref: '#/components/responses/403ApiError'
+          
+  /api/shop/{shopId}/products/{productId}:
+    patch:
+      tags:
+        - Restricted
+      description: Updates a Product By Id
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+            example: 4
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+              
+      responses:
+        '204':
+          description: Resource Updated Successfully
+        '403':
+          $ref: '#/components/responses/403ApiError'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+    delete:
+      tags:
+        - Restricted
+      description: Deletes a Product Resouce By Id
+      parameters:
+        - in: path
+          name: shopId
+          required: true
+          schema:
+            type: string
+            example: 1
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '204':
+          description: Resource Deleted Successfully
+        '403':
+          $ref: '#/components/responses/403ApiError'
+        '404':
+          $ref: '#/components/responses/404ApiError'    
+          
+  /api/orders:
+    get:
+      tags:
+        - Restricted
+      description: Returns all orders for the authenticated user
+      responses:
+        '200':
+          description: Returns all orders placed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+    post:
+      tags:
+        - Restricted
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                shop_id:
+                  type: integer
+                  example: 21
+                products:
+                  type: array
+                  items:
+                    properties:
+                      product_id: 
+                        type: integer
+                        example: 49
+                      quantity:
+                        type: integer
+                        example: 2
+      responses:
+        '201':
+          description: Resource stored successfully
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/400ApiError'
+        '403':
+          $ref: '#/components/responses/403ApiError'
+        
+  /api/orders/{id}:
+    get:
+      tags:
+        - Restricted
+      description: Returns a given order by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            example: 1
+      responses:
+        '200':
+          description: Returns all orders placed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+        '404':
+          $ref: '#/components/responses/404ApiError'
+
+components:
+  schemas:
+    User:
+      type: object
+      required:
+        - email
+        - username
+        - password
+      properties:
+        email:
+          type: string
+          example: example@domain.nl
+        username:
+          type: string
+          example: username_example
+        password:
+          type: string
+          format: password
+          example: password2000
+        address:
+          type: string
+          example: Sample Street 271
+        postal:
+          type: string
+          example: 7416BP
+          
+    Credentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: example@domain.nl
+        password:
+          type: string
+          format: password
+          example: password2000
+          
+    Shop:
+      type: object
+      properties:
+        shopId:
+          type: integer
+          example: 4
+        ownerId:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Small City Shop
+        description:
+          type: string
+          example: Come check this place out, you wont be disapointed
+        imageName:
+          type: string
+          example: imageOne_123671236.jpg
+        imageURL:
+          type: string
+          example: /storage/images/shop/imageOne_123671236.jpg
+          
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        shopId:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Fancy Shoes
+        price:
+          type: number
+          format: double
+          example: 21.60
+        category:
+          type: string
+          example: shoes
+        stock:
+          type: integer
+          example: 200
+        inStock:
+          type: boolean
+          example: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        updated:
+          type: string
+          format: date
+          example: '2020-10-11T00:00:00'
+          
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 20
+        productId:
+          type: integer
+          example: 4
+        name:
+          type: string
+          example: productImage_3712371293.jpeg
+        url:
+          type: string
+          example: /storage/images/product/productImage_3712371293.jpeg
+          
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 20
+        shop_id:
+          type: integer
+          example: 15
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+           
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12
+        orderId:
+          type: integer
+          example: 15
+        productId:
+          type: integer
+          example: 15
+        quantity:
+          type: integer
+          example: 2
+        total:
+          type: number
+          format: decimal
+          example: 12.70
+    
+    ShopInput:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          example: Small Local Shop
+        description:
+          type: string
+          example: We sell all kinds of useful products. Try us out!
+        image_url:
+          format: binary
+          type: string
+    
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+        - stock
+        - category
+      properties:
+        name:
+          type: string
+          example: Product's Name
+        price:
+          type: number
+          format: decimal
+          example: 3.50
+        stock:
+          type: integer
+          example: 500
+        category:
+          type: string
+          example: accessories
+        imageOne:
+          format: binary
+          type: string
+        imageTwo:
+          format: binary
+          type: string
+        imageThree:
+          format: binary
+          type: string
+
+  responses:
+    400ApiError:
+      description: The User has entered wrong request body data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Given Field is mandatory
+                
+    401ApiError:
+      description: User already has a web shop, and cannot have a second one
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: A user cannot have more than 1 web shop
+                
+    403ApiError:
+      description: User is not the owner of the resource
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Cannot create/edit/delete resource that is not yours
+                
+    404ApiError:
+      description: Resource that the user is looking for does not exist
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Resource not found
