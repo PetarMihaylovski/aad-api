@@ -46,8 +46,8 @@ class ProductController extends Controller
             throw new CustomException("Shop with ID: {$shopId} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
         }
 
+        $category = null;
         if ($request->has('category')) {
-            // if statement has no scope, so no need to define it outside as well
             $category = $request->query('category');
             $products = $this->productService->getAllProducts($shop, $category);
         } else {
@@ -167,7 +167,7 @@ class ProductController extends Controller
             $request->input('category'),
         );
 
-        return response(null, 200);
+        return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 
     /**

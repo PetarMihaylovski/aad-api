@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\CustomException;
-use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
-use App\Http\Resources\ProductResource;
-use App\Models\Order;
 use App\Services\OrderService;
 use App\Services\ProductService;
 use App\Services\ShopService;
@@ -41,6 +38,11 @@ class OrderController extends Controller
     public function index(){
         $user = $this->userService->getAuthUser();
         $orders = $this->orderService->getOrdersByUserId($user['id']);
+
+        if ($orders==null || $orders->count() == 0){
+            throw new CustomException("You have not placed any orders yet!",
+                ResponseAlias::HTTP_NOT_FOUND);
+        }
 
         return response(OrderResource::collection($orders->loadMissing(['items'])), ResponseAlias::HTTP_OK);
     }

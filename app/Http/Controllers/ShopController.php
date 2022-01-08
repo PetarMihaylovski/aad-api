@@ -102,8 +102,11 @@ class ShopController extends Controller
     public function update(Request $request, $id)
     {
         $shop = $this->shopService->getShopById($id);
-        if (!$this->userService->isShopOwner($shop)) {
-            throw new CustomException("Cannot edit a shop, that you do not own", ResponseAlias::HTTP_FORBIDDEN);
+        if ($shop == null){
+            throw new CustomException("Shop with Id: {$id} does not exist!", ResponseAlias::HTTP_NOT_FOUND);
+        }
+        else if (!$this->userService->isShopOwner($shop)) {
+            throw new CustomException("Cannot edit a shop, that you do not own!", ResponseAlias::HTTP_FORBIDDEN);
         }
 
         $this->validatorService->validate($request->all(),[
@@ -111,12 +114,12 @@ class ShopController extends Controller
             'description' => 'required',
         ]);
 
-        $updated = $this->shopService->updateShop(
+        $this->shopService->updateShop(
             $shop,
             $request->input('name'),
             $request->input('description'),
         );
-        return response(new ShopResource($updated), ResponseAlias::HTTP_OK);
+        return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 
     /**
