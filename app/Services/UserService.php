@@ -8,6 +8,9 @@ class UserService
 {
 
     /**
+     * returns the current authenticated user,
+     * based on the provided token
+     *
      * @return User
      */
     public function getAuthUser(): User
@@ -43,6 +46,8 @@ class UserService
     }
 
     /**
+     * updates weather a user makes or deletes a web shop
+     *
      * @return void
      */
     public function setOwnShop(bool $owns)
@@ -52,6 +57,8 @@ class UserService
     }
 
     /**
+     * checks if the user is the owner
+     * of the given shop
      * @param $id
      * @return bool
      */

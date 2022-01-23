@@ -15,6 +15,8 @@ class ShopService
     }
 
     /**
+     * returns a specific shop by id
+     *
      * @param $id
      * @return mixed
      */
@@ -55,7 +57,10 @@ class ShopService
     {
         $shop->name = $name;
         $shop->description = $description;
-        $shop->image_url = $image_url;
+
+        if ($image_url != null) {
+            $shop->image_url = $image_url;
+        }
 
         $shop->save();
 

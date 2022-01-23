@@ -63,6 +63,7 @@ class ShopController extends Controller
 
         $storedImageName = null;
         if ($request->hasFile('image_url')) {
+            // store the image in case it exists
             $storedImageName = $this->imageService->storeImage($request->file('image_url'), true);
         }
 
@@ -109,6 +110,7 @@ class ShopController extends Controller
             throw new CustomException("Cannot edit a shop, that you do not own!", ResponseAlias::HTTP_FORBIDDEN);
         }
 
+        // validate the request
         $this->validatorService->validate($request->all(),[
             'name' => 'required',
             'description' => 'required',
@@ -119,6 +121,7 @@ class ShopController extends Controller
             $request->input('name'),
             $request->input('description'),
         );
+
         return response(null, ResponseAlias::HTTP_NO_CONTENT);
     }
 

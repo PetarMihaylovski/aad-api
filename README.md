@@ -4,6 +4,9 @@
 3) ```composer install``` from the root to install php dependencies
 4) spin up the docker compose file
 
+note: in the ``.env`` file, the database hosted on the docker container is specified.
+if you want to connect to a local database, change the variables in the ``.env`` file
+
 ## API Spec
 1) in the root of the repository, the ``openapi-spec.yaml`` could be found
 2) load that file in a swagger editor
