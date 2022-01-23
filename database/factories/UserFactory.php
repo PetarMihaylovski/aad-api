@@ -25,6 +25,8 @@ class UserFactory extends Factory
             "email" => $this->faker->email(),
             "username" => $this->faker->userName(),
             "password" => $this->faker->password(),
+            "address" => $this->faker->address(),
+            "postal" => $this->faker->postcode
         ];
     }
 }

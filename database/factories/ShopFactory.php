@@ -22,11 +22,13 @@ class ShopFactory extends Factory
      */
     public function definition()
     {
-        $userIds = DB::table('uses')->pluck('id')->all();
+        $userIds = DB::table('users')->pluck('id')->all();
         return [
             'user_id' => $this->faker->randomElement($userIds),
             'name' => $this->faker->name(),
-            'description' => $this->faker->sentence()
+            'description' => $this->faker->sentence(),
+            'image_name' => '',
+            'image_url' => ''
         ];
     }
 }
