@@ -4,6 +4,10 @@
 3) ```composer install``` from the root to install php dependencies
 4) spin up the docker compose file
 
+## API Spec
+1) in the root of the repository, the ``openapi-spec.yaml`` could be found
+2) load that file in a swagger editor
+3) read it
 
 ## Spin the docker-compose file
 
