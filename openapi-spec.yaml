@@ -83,7 +83,7 @@ paths:
                   $ref: '#/components/schemas/Shop'
     post:
       tags:
-      - Unrestricted
+      - Restricted
       description: Store a new web shop
       requestBody:
         content:
@@ -296,6 +296,7 @@ paths:
     post:
       tags:
         - Restricted
+      description: Places a new order
       requestBody:
         content:
           application/json:
